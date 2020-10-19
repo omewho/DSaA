@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+typedef struct Node *PtrToNode;
+struct Node {
+    ElementType Data;
+    PtrToNode   Next;
+};
+typedef PtrToNode List;
+
+List Read() {
+	PtrToNode node, head, tail;
+	head = tail = NULL;
+	
+	int n, data;
+	scanf("%d", &n);
+	printf("%d\n", n);
+	while(n){
+		node = (PtrToNode)malloc(sizeof(struct Node));
+		scanf("%d", &data);
+		node->Data = data;
+		node->Next = NULL;
+		
+		if(!head) head = node;
+		else tail->Next = node;
+		tail = node;
+		
+		n--;
+	}
+	return head;
+	
+}
+void Print( List L ) {
+	PtrToNode node = L;
+	int first = 1;
+	while(node) {
+		if(first) first = 0; 
+		else printf(" ");
+		printf("%d", node->Data);
+		
+		node = node->Next;
+	}
+	printf("\n");
+}
+
+List Reverse( List L ) {
+	PtrToNode node = L, next, newhead, newtail;
+	newhead = newtail = NULL;
+	
+	while(node) {
+		if(!newtail) {
+			newtail = node;
+			next = node->Next; // It's necessary to store the next node
+			newtail->Next = NULL; //Set the new tail's Next point to NULL
+		}
+		else {
+			next = node->Next;
+			node->Next = newhead;
+		}
+		newhead = node;
+		
+		node = next;
+	}
+	return newhead;
+}
+
+int main()
+{
+    List L1, L2;
+    L1 = Read();
+    L2 = Reverse(L1);
+    Print(L1);
+    Print(L2);
+    return 0;
+}
