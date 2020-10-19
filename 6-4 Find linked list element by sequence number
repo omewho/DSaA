@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ERROR -1
+typedef int ElementType;
+typedef struct LNode *PtrToLNode;
+struct LNode {
+    ElementType Data;
+    PtrToLNode Next;
+};
+typedef PtrToLNode List;
+
+List Read() {
+	PtrToLNode head, tail, node;
+	head = tail = NULL;
+	
+	int num;
+	scanf("%d", &num);
+	while(num != -1) {
+		node = (PtrToLNode)malloc(sizeof(LNode));
+		node->Data = num;
+		node->Next = NULL;
+		
+		if(!head) {
+			head = node;
+		}
+		else {
+			tail->Next = node;
+		}
+		tail = node;
+		
+		scanf("%d", &num);
+	}
+	
+	return head;
+}
+
+void printList(List L) {
+	PtrToLNode head;
+	printf("List:");
+	while(head) {
+		printf(" %d", head->Data);
+		head = head->Next;
+	}
+	printf("\n");
+}
+
+
+ElementType FindKth( List L, int K ) {
+	ElementType dt = ERROR;
+	
+	int k = 0;
+	PtrToLNode head = L;
+	while(head) {
+		k++;
+		if(k == K) {
+			dt = head->Data;
+			break;
+		}
+		head = head->Next;
+	}
+	
+	return dt;
+}
+
+int main()
+{
+    int N, K;
+    ElementType X;
+    List L = Read();
+    printList(L);
+    
+    scanf("%d", &N);
+    while ( N-- ) {
+        scanf("%d", &K);
+        X = FindKth(L, K);
+        if ( X!= ERROR )
+            printf("%d ", X);
+        else
+            printf("NA ");
+    }
+    return 0;
+}
