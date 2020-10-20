@@ -1,0 +1,188 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ERROR NULL
+typedef int ElementType;
+typedef struct LNode *PtrToLNode;
+struct LNode {
+    ElementType Data;
+    PtrToLNode Next;
+};
+typedef PtrToLNode Position;
+typedef PtrToLNode List;
+
+void printList(List L);
+Position Find( List L, ElementType X );
+List Insert( List L, ElementType X, Position P );
+List Delete( List L, Position P );
+
+int main()
+{
+    List L;
+    ElementType X;
+    Position P, tmp;
+    int N;
+
+    L = NULL;
+    scanf("%d", &N);
+    while ( N-- ) {
+        scanf("%d", &X);
+        L = Insert(L, X, L);
+        printList(L);
+        if ( L==ERROR ) printf("Wrong Answer\n");
+        
+        
+    }
+    printf("Reading finished.\n");
+    
+    scanf("%d", &N);
+    while ( N-- ) {
+        scanf("%d", &X);
+        P = Find(L, X);
+        if ( P == ERROR )
+            printf("Finding Error: %d is not in.\n", X);
+        else {
+            L = Delete(L, P);
+            printf("%d is found and deleted.\n", X);
+//            printf("List now becomes: ");
+//            printList(L);
+            if ( L==ERROR )
+                printf("Wrong Answer or Empty List.\n");
+        }
+    }
+    L = Insert(L, X, NULL);
+    if ( L==ERROR ) printf("Wrong Answer\n");
+    else {
+    	printf("%d is inserted as the last element.\n", X);
+    	printf("After insertion: ");
+    	printList(L);
+	}
+        
+    P = (Position)malloc(sizeof(struct LNode));
+    tmp = Insert(L, X, P);
+    if ( tmp!=ERROR ) printf("Wrong Answer\n");
+    tmp = Delete(L, P);
+    if ( tmp!=ERROR ) printf("Wrong Answer\n");
+    for ( P=L; P; P = P->Next ) printf("%d ", P->Data);
+    return 0;
+}
+
+void printList(List L) {
+	Position pos = L;
+	
+	int first = 1;
+	while(pos) {
+		if(first) first = !first;
+		else printf(" ");
+		printf("%d", pos->Data);
+		
+		pos = pos->Next;
+	}
+	printf("\n");
+}
+
+
+
+Position Find( List L, ElementType X ) {
+	Position pos = ERROR, node = L;
+	while(node) {
+		if(node->Data == X) {
+			pos = node;
+			break;
+		}
+		node = node->Next;
+	}
+	
+	return pos;	
+}
+
+
+List Insert( List L, ElementType X, Position P ) {
+	
+	PtrToLNode newnode = (PtrToLNode)malloc(sizeof(struct LNode));
+	newnode->Data = X;
+	newnode->Next = NULL;
+	
+	Position pos = L, next, res = ERROR;
+	if( P == L ) {
+		
+		newnode->Next = pos;
+		res = newnode;
+	}
+	
+	else { // P is not the first node, i.e. the head
+		
+		if(!L) {
+			printf("Wrong Position for Insertion\n");
+			free(newnode);
+		}
+		
+		else {
+			next = pos->Next;
+			while(next && next != P) {
+				
+				pos = next;
+				next = next->Next;
+			}
+			
+			if(!next) {
+				if(next == P) {  // next == P == NULL
+					pos->Next = newnode;
+					res = L;
+				}
+				else {
+					printf("Wrong Position for Insertion\n");  //P can not be found in the whole list
+					free(newnode);
+				}
+			}
+			
+			else { // next is not NULL, then next == P
+				newnode->Next = next;
+				pos->Next = newnode;
+				res = L;
+			}
+			
+		}
+		
+	}
+	
+	return res;
+}
+
+
+List Delete( List L, Position P ) {
+	Position pos = L, res = ERROR;
+	
+	//printf("\nPdata is %d, List befor deletion: ", P->Data);
+	//printList(L);
+	
+	if( P == pos){
+		
+		res = pos->Next;
+		
+		L->Next = NULL;
+		free(L);
+	}
+	
+	else {
+		if(!pos) printf("Wrong Position for Deletion\n");
+		else {
+			while(pos) {
+				Position next = pos->Next;
+				
+				if(next == P) {
+					pos->Next = P->Next;
+					res = L;
+					//printf("After: ");
+					//printList(L);
+					break;
+				}
+				pos = pos->Next;
+			}
+			
+			if(pos == NULL) printf("Wrong Position for Deletion\n");
+		}
+		
+	}
+	return res;
+}
