@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+typedef struct node* PtrtoNode;
+struct node {
+    ElementType Data;
+    PtrtoNode Next;
+};
+
+typedef PtrtoNode List;
+
+void printList(List L);
+
+List createList() {
+	
+    PtrtoNode head = (PtrtoNode)malloc(sizeof(struct node));
+    head->Next = NULL;
+    
+    PtrtoNode tail;
+    
+    int num;
+    scanf("%d", &num);
+    
+    while(num != -1) {
+        
+        PtrtoNode nd = (PtrtoNode)malloc(sizeof(struct node));
+        nd->Data = num;
+        nd->Next = NULL;
+        
+        if(!(head->Next)) head->Next = nd;
+        else tail->Next = nd;
+        
+        tail = nd;
+        scanf("%d", &num);
+    }
+    return head;
+}
+
+List symmDiff(List L1, List L2){
+	PtrtoNode head = (PtrtoNode)malloc(sizeof(struct node)), tail, nd1, nd2;
+	head->Next = NULL;
+	
+	nd1 = L1->Next, nd2 = L2->Next;
+	
+	while(nd1 && nd2){
+		//printf("nd1 = %d, nd2 = %d\n", nd1->Data, nd2->Data);
+		
+		if(nd1->Data == nd2->Data) {
+			PtrtoNode nd = (PtrtoNode)malloc(sizeof(struct node));
+			nd->Data = nd1->Data;
+			nd->Next = NULL;
+			
+			if(!(head->Next)) {
+				head->Next = nd;
+			}
+			else tail->Next = nd;
+			
+			tail = nd;
+			
+			nd1 = nd1->Next;
+			nd2 = nd2->Next;
+		}
+		
+		else if(nd1->Data < nd2->Data) nd1 = nd1->Next;
+		else nd2 = nd2->Next;
+		
+	}
+	
+	return head;
+}
+    
+void printList(List L) {
+    PtrtoNode nd = L->Next;
+    
+    int first = 1;
+    
+    if(!nd) printf("NULL\n");
+    else {
+        while(nd) {
+	        if(first) first = !first;
+	        else printf(" ");
+	        printf("%d", nd->Data);
+	        
+	        nd = nd->Next;
+    	}
+    	printf("\n");		
+	}
+
+}
+    
+int main() {
+    
+    List S1 = createList();
+    
+    //printList(S1);
+    
+    List S2 = createList();
+    
+    //printList(S2);
+    
+    List S3 = symmDiff(S1, S2);
+    
+    printList(S3);
+    
+    return 0;
+}
