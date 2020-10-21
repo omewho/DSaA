@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+typedef struct LNode *PtrtoNode;
+struct LNode {
+    ElementType data;
+    PtrtoNode next;
+};
+typedef PtrtoNode List;
+
+List createList() {
+    PtrtoNode head = (PtrtoNode)malloc(sizeof(struct LNode));
+    head->next = NULL;
+    return head;
+}
+
+void readList(List L) {
+    PtrtoNode head = L;
+    
+    int num;
+    scanf("%d", &num);
+    
+    while(num >= 0) {
+        
+        PtrtoNode node = (PtrtoNode)malloc(sizeof(struct LNode)), next_node = head->next;
+        node->data = num;
+        node->next = next_node;
+        head->next = node;
+        
+        scanf("%d", &num);
+    }
+    
+}
+
+void printList(List L) {
+    PtrtoNode node = L->next;
+    int first = 1;
+    while(node) {
+        if(first) first = !first;
+        else printf(" ");
+        printf("%d", node->data);
+        node = node->next;
+    }
+    printf("\n");
+}
+
+ElementType findKthLast(List L, int K) {
+    ElementType res = -1;
+    
+    int count = 1;
+    PtrtoNode node = L->next;
+    while(node && count != K) {
+        //printf("%d: %d\n", count, node->data);
+		node = node->next;
+        count++;
+    }
+    
+    if(node && count == K) res = node->data;
+    
+    return res;
+    
+}
+
+int main() {
+    
+    int K;
+    scanf("%d", &K);
+    
+    List L = createList();
+    readList(L);
+    //printList(L);
+
+    ElementType res = findKthLast(L, K);
+    if(res == -1) printf("NULL\n");
+    else printf("%d\n", findKthLast(L, K));
+    
+    return 0;
+}
