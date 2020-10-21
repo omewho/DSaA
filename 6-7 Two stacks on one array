@@ -1,0 +1,154 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ERROR 1e8
+typedef int ElementType;
+typedef enum { push, pop, end } Operation;
+typedef enum { false, true } bool;
+typedef int Position;
+struct SNode {
+    ElementType *Data;
+    Position Top1, Top2;
+    int MaxSize;
+};
+typedef struct SNode *Stack;
+
+Stack CreateStack( int MaxSize );
+bool Push( Stack S, ElementType X, int Tag );
+ElementType Pop( Stack S, int Tag );
+
+//void readOp(char s[]){  //Not good for reading the last input "End"
+//	int i = 0;
+//	while((s[i] = getchar()) != ' ') i++;
+//	s[i] = '\0';  
+//}
+
+Operation GetOp();  /* details omitted */
+void PrintStack( Stack S, int Tag ); /* details omitted */
+
+int main()
+{
+    int N, Tag, X;
+    Stack S;
+    int done = 0;
+
+    scanf("%d", &N);
+    S = CreateStack(N);
+    while ( !done ) {
+        switch( GetOp() ) {
+        case push: 
+            scanf("%d %d", &Tag, &X);
+            //printf("%d %d\n", Tag, X); 
+            if (!Push(S, X, Tag)) printf("Stack %d is Full!\n", Tag);
+            break;
+        case pop:
+            scanf("%d", &Tag);
+            //printf("%d\n", Tag); 
+            X = Pop(S, Tag);
+            if ( X==ERROR ) printf("Stack %d is Empty!\n", Tag);
+            break;
+        case end:
+        	//printf("end: %d\n", end);
+            PrintStack(S, 1);
+            PrintStack(S, 2);
+            done = 1;
+            break;
+        }
+    }
+    
+    
+    return 0;
+}
+
+
+Stack CreateStack( int MaxSize ) {
+	
+	Stack s = (Stack)malloc(sizeof(struct SNode));
+	s->Data = (ElementType *)malloc( MaxSize * sizeof(ElementType));
+	s->MaxSize = MaxSize;
+	s->Top1 = -1;
+	s->Top2 = MaxSize;
+	s->MaxSize = MaxSize;
+	return s;
+}
+
+
+bool Push( Stack S, ElementType X, int Tag ) {
+	
+	//printf("Hay I am here.\n");
+	if (S->Top2 - S->Top1 == 1) {
+		printf("Stack Full\n");
+		return false;
+	}
+	else {
+		if(Tag == 1){
+			S->Data[++(S->Top1)] = X;
+			//printf("%d is pushed into Stack %d\n", X, Tag);
+			return true;
+		}
+		else {
+			S->Data[--(S->Top2)] = X;
+			//printf("%d is pushed into Stack %d\n", X, Tag);
+			return true;
+		}
+	}
+	
+}
+
+
+ElementType Pop( Stack S, int Tag ){
+	ElementType res = ERROR;
+	if(Tag == 1) {
+		if(S->Top1 < 0) printf("Stack %d Empty\n", Tag);
+		else res = S->Data[(S->Top1)--];
+	}
+	else {
+		if(S->Top2 > S->MaxSize - 1) printf("Stack %d Empty\n", Tag);
+		else res = S->Data[(S->Top2)++];
+	}
+	return res;
+}
+
+
+Operation GetOp() {  /* details omitted */
+	
+	char op[5];
+	getchar();
+	scanf("%s", op);
+	//printf("%s\n", op);
+	Operation res;
+	switch (op[1]) {
+		case 'u': res = push;
+			//printf("Op = push\n");
+			break;
+		case 'o': res = pop;
+		///printf("Op = pop\n");
+			break;
+		case 'n': res = end;
+			//printf("Op = end\n");
+			break;	
+	}
+	return res;
+} 
+
+void PrintStack( Stack S, int Tag ) {/* details omitted */
+	
+	printf("Pop from Stack %d:", Tag);
+	
+	if(Tag == 1) {
+		int size = S->Top1 + 1;
+		for(int i = 0; i < size; i++){
+			printf(" %d", Pop(S, Tag));
+		}
+		printf("\n");
+	}
+	
+	else {
+		int size = S->MaxSize - S->Top2;
+		for(int i = 0; i < size; i++){
+			printf(" %d", Pop(S, Tag));
+		}
+		printf("\n");
+	}
+	
+} 
