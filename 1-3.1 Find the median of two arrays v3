@@ -26,7 +26,7 @@ int findMedian(int *arra, int *arrb, int n, int m) {
 			
 			lefta = mida;
 			rightb = midb;
-			if(num % 2 == 0) lefta++; 
+			if(num % 2 == 0) lefta++; // if the number of nums is even
 		}
 		else if(arra[mida] > arrb[midb]) {  //arra[mida] > arrb[midb]
 			
