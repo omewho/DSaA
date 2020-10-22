@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+
+typedef struct LNode *PtrtoNode;
+struct LNode {
+	ElementType Data;
+	PtrtoNode Next;
+};
+typedef PtrtoNode List;
+
+void readList(List L){
+	
+	PtrtoNode node, tail;
+	
+	int num;
+	scanf("%d", &num);
+	
+	while(num != -1){
+		node = (PtrtoNode)malloc(sizeof(struct LNode));
+		node->Data = num;
+		node->Next = NULL;
+		
+		if(!(L->Next)) L->Next = node;
+		else tail->Next = node;
+		
+		tail = node;
+		scanf("%d", &num); 
+	}
+	
+}
+
+
+void printList(List L){
+	PtrtoNode node = L->Next;
+	
+	if(!node) printf("NULL");
+	else {
+		int first = 1;
+		while(node){
+			if(first) first = !first;
+			else printf(" ");
+			printf("%d", node->Data);
+			node = node->Next;
+		}
+	}
+	printf("\n");
+}
+
+
+List intersect(List L1, List L2) {
+	
+	PtrtoNode head = (PtrtoNode)malloc(sizeof(struct LNode)), tail;
+	head->Next = NULL; 
+	
+	PtrtoNode nd1 = L1->Next, nd2 = L2->Next;
+	while(nd1 && nd2){
+		if(nd1->Data == nd2->Data) {
+			
+			PtrtoNode nd = (PtrtoNode)malloc(sizeof(struct LNode));
+			nd->Data = nd1->Data;
+			nd->Next = NULL;
+			
+			if(!(head->Next)) {
+				head->Next = nd;
+				tail = head->Next;
+			}  
+			else {
+				tail->Next = nd;
+				tail = nd;
+			}
+			
+			nd1 = nd1->Next;
+			nd2 = nd2->Next;
+		}
+		else if(nd1->Data < nd2->Data) nd1 = nd1->Next;
+		else nd2 = nd2->Next;		
+	}
+	return head;
+}
+
+
+int main(){
+    
+    List L1 = (PtrtoNode)malloc(sizeof(struct LNode)), \
+	L2 = (PtrtoNode)malloc(sizeof(struct LNode));
+    L1->Next = NULL;
+    L2->Next = NULL;
+    
+    readList(L1);
+    readList(L2);
+    
+    
+    List L3 = intersect(L1, L2);
+    printList(L3);
+    
+    return 0;
+}
