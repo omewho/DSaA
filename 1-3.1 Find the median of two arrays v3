@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void readInput(int arr[], int num) {
+	for(int i = 0; i < num; i++) {
+		scanf("%d", &arr[i]);
+	}
+}
+
+int findMedian(int *arra, int *arrb, int n, int m) {
+	
+	int res = 0;
+	
+	int lefta = 0, righta = n - 1, leftb = 0, rightb = m - 1;
+	
+	int mida = (lefta + righta) / 2, midb = (leftb + rightb) / 2;
+	
+	while(lefta < righta && leftb < rightb) {
+		int num = righta - lefta + 1;
+		
+		if(arra[mida] == arrb[midb]) {
+			res = arra[mida];
+			break;
+		}
+		else if(arra[mida] < arrb[midb]) {
+			
+			lefta = mida;
+			rightb = midb;
+			if(num % 2 == 0) lefta++; 
+		}
+		else if(arra[mida] > arrb[midb]) {  //arra[mida] > arrb[midb]
+			
+			righta = mida;
+			leftb = midb;
+			if(num % 2 == 0) leftb++;
+		}
+		mida = (lefta + righta) / 2;
+		midb = (leftb + rightb) / 2;
+	}
+	if(arra[mida] < arrb[midb]) res = arra[mida];
+	else res = arrb[midb];
+	
+	return res;
+}
+
+int main() {
+    
+    int n;
+    scanf("%d", &n);
+    int arr1[n], arr2[n];
+    
+    readInput(arr1, n);
+    readInput(arr2, n);
+    
+    printf("%d\n", findMedian(arr1, arr2, n, n));
+    
+    return 0;
+}
