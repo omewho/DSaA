@@ -88,3 +88,5 @@ void LevelorderTraversal( BinTree BT ) {
 		
 	}
 }
+
+//Another way of implementing the queue is to use a linked list with a varialbe head and tail. To dequeue, move the head, to addQueue, add the node to the tail.
