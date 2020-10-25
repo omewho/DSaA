@@ -1,0 +1,122 @@
+#include <stdio.h>
+#define MAXSIZE 100
+
+typedef int Position;
+typedef int ElementType;
+
+void printStack(ElementType *stack, Position top);
+
+int main() {
+	
+	ElementType stack1[MAXSIZE], stack2[MAXSIZE];
+	Position top1 = -1, top2 = -1;
+	
+	int n1, n2;
+	scanf("%d %d", &n1, &n2);
+	
+	if(n1 > n2) {
+		int temp = n1;
+		n1 = n2;
+		n2 = temp;
+	}
+	
+	char op;
+	scanf("%c", &op);
+	
+	while(op != 'T') {
+		if(op == 'A') {
+			ElementType data;
+			scanf("%d", &data);
+//			printf("%c %d\n", op, data);
+			
+			if(top1 == n1 - 1 && top2 != -1) printf("ERROR:Full\n");  // Stack 1 is full, and stack 2 is not empty,\
+			this means the two stacks as a queue is full
+			
+			else {   /* 1. top2 == -1 && top1 == n1 -1 Stack 2 is empty
+			*/ 
+				
+//				printf("\ntop1 is %d, top2 is %d\n", top1, top2);
+				stack1[++top1] = data;
+//				printf("Stack 1: ");
+//				printStack(stack1, top1);
+//				printf("Stack 2: ");
+//				printStack(stack2, top2);
+//				printf("After pushing: top1 is %d, top2 is %d\n", top1, top2);
+//				printf("\n");
+				
+				if (top1 == n1 - 1 && top2 == -1) {
+					while(top2 < n1 - 1) {
+						
+//						printf("\nBefore transefering: top1 is %d, top2 is %d\n", top1, top2);
+						stack2[++top2] = stack1[top1--];
+						
+//						printf("After: top1 is %d, top2 is %d\n", top1, top2);
+//						printf("Stack 1: ");
+//						printStack(stack1, top1);
+//						printf("Stack 2: ");
+//						printStack(stack2, top2);
+//						printf("\n");
+					}					
+				}				
+			}
+				
+			
+			
+		}
+		
+		else if(op == 'D') {
+//			printf("%c\n", op);
+			
+			if(top2 == -1) {// Stack 2 is empty
+				if( top1 != -1) {
+//					printf("\nBefore popping: top1 is %d, top2 is %d\n", top1, top2);
+					while(top1 > -1) {
+						stack2[++top2] = stack1[top1--];
+					}
+//					printf("After: top1 is %d, top2 is %d\n", top1, top2);
+//					printf("Stack 1: ");
+//					printStack(stack1, top1);
+//					printf("Stack 2: ");
+//					printStack(stack2, top2);
+//					printf("\n");	
+				}
+				
+				else printf("ERROR:Empty\n");
+			}
+			
+			if(top2 != -1) {
+				printf("%d\n", stack2[top2--]);
+				
+				if(top2 == -1 && top1 != -1){
+//					printf("\nBefore popping: top1 is %d, top2 is %d\n", top1, top2);
+					while(top1 > -1) {
+						stack2[++top2] = stack1[top1--];
+					}
+//					printf("After: top1 is %d, top2 is %d\n", top1, top2);
+//					printf("Stack 1: ");
+//					printStack(stack1, top1);
+//					printf("Stack 2: ");
+//					printStack(stack2, top2);
+//					printf("\n");						
+					
+				}
+			}
+		}
+		
+		scanf("%c", &op);
+	}
+	
+	
+	return 0;
+}
+
+void printStack(ElementType *stack, Position top) {
+	int first = 1;
+	
+	for(Position pos = 0; pos <= top; pos++){
+		if(first) first = !first;
+		else printf(" ");
+		printf("%d", stack[pos]);
+	}
+	printf("\n");
+}
