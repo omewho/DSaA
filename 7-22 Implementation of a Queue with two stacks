@@ -1,0 +1,131 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int Position;
+typedef int ElementType;
+
+typedef struct StackNode *Stack;
+struct StackNode{
+	ElementType *Data;
+	Position Top;
+	int Size;
+};
+
+Stack createStack(int Size);
+void printStack(Stack s);
+int isFull(Stack s);
+int isEmpty(Stack s);
+int push(Stack s, ElementType elem);
+int pop(Stack s);
+
+
+int main() {
+	
+	int n1, n2, min;
+	scanf("%d %d", &n1, &n2);
+	
+	min = n1;
+	if(n1 > n2)  min = n2;
+	
+	Stack s1, s2;
+	s1 = createStack(min);
+	s2 = createStack(min);
+	
+	char op;
+	scanf("%c", &op);
+	
+	while(op != 'T') {
+		if(op == 'A') {
+			ElementType data;
+			scanf("%d", &data);
+			
+			if(isFull(s1) && !isEmpty(s2)) printf("ERROR:Full\n");  // Stack 1 is full, and stack 2 is not empty,\
+			this means the two stacks as a queue is full
+			
+			else {   /* 1. Stack 2 is empty, stack 1 is full
+			            2. Stack 2 is empty, but stack 1 is not full
+			            3. Stack 2 is not empty, and stack 1 is not full 
+					*/ 
+				push(s1, data);
+				
+				if (isFull(s1) && isEmpty(s2)) {
+					for(int i = 0; i < min; i++) {
+						
+//						printf("\nBefore transefering: top1 is %d, top2 is %d\n", s1->Top, s2->Top);
+						push(s2, pop(s1));
+					}					
+				}				
+			}	
+		}
+		
+		else if(op == 'D') {
+			
+			if(isEmpty(s2)) {
+				printf("ERROR:Empty\n");
+			}
+			
+			if(!isEmpty(s2)) {
+				printf("%d\n", pop(s2));
+				
+				if(isEmpty(s2) && !isEmpty(s1)){
+//					printf("\nBefore popping: top1 is %d, top2 is %d\n", s1->Top, s2->Top);
+					int top = s1->Top;
+					for(int i = 0; i <= top; i++) {
+//						printf("i is %d\n", i);
+						push(s2, pop(s1));
+					}						
+//					printf("Stack 1: ");
+//					printStack(s1);
+//					printf("Stack 2: ");
+//					printStack(s2);
+//					printf("\n");
+				}
+			}
+		}
+		
+		scanf("%c", &op);
+	}
+	
+	
+	return 0;
+}
+
+void printStack(Stack s) {
+	int first = 1;
+	
+	for(Position pos = 0; pos <= s->Top; pos++){
+		if(first) first = !first;
+		else printf(" ");
+		printf("%d", s->Data[pos]);
+	}
+	printf("\n");
+}
+
+int isFull(Stack s) {
+	return s->Top == s->Size - 1;
+}
+
+int isEmpty(Stack s) {
+	return s->Top == -1;
+}
+
+Stack createStack(int Size) {
+	Stack s = (Stack)malloc(sizeof(struct StackNode));
+	s->Data = (ElementType *)malloc(Size * sizeof(ElementType));
+	s->Top = -1;
+	s->Size = Size;
+	return s;
+}
+
+int push(Stack s, ElementType elem){
+	if(isFull(s)) return 0;
+	
+	s->Data[++(s->Top)] = elem;
+	return 1;
+}
+
+int pop(Stack s) {
+	if(isEmpty(s)) return -1;
+	
+	return s->Data[(s->Top)--];
+}
