@@ -1,0 +1,134 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node *PtrToNode;
+struct Node {
+    int Coefficient;
+    int Exponent;
+    PtrToNode Next;
+};
+typedef PtrToNode Polynomial;
+
+Polynomial Read() {/* details omitted */
+	
+	Polynomial head = (Polynomial)malloc(sizeof(struct Node)), tail = NULL;
+	head->Next = NULL;
+	
+	int n;
+	scanf("%d", &n);
+	
+	for(int i = 0; i < n; i++) {
+		
+		Polynomial node = (Polynomial)malloc(sizeof(struct Node));
+		scanf("%d %d", &node->Coefficient, &node->Exponent);
+		node->Next = NULL;
+		
+		if(!tail) {
+			head->Next = node;
+		}
+		else tail->Next = node;
+		tail = node;
+	}
+	
+	return head;
+}
+  
+void Print( Polynomial p ){/* details omitted */
+	
+	Polynomial node = p->Next;
+	
+	int first = 1;
+	
+	while(node) {
+		if(first) first = !first;
+		else printf(" ");
+		printf("%d %d", node->Coefficient, node->Exponent);
+		
+		node = node->Next;
+	}
+	printf("\n");
+} 
+ 
+Polynomial Add( Polynomial a, Polynomial b ) {
+	
+	Polynomial head = (Polynomial)malloc(sizeof(struct Node)), a_node = a->Next, b_node = b->Next, tail, node;
+	head->Next = NULL;
+	tail = head->Next;
+	
+	while(a_node && b_node) {
+		node = NULL;
+		if(a_node->Exponent < b_node->Exponent) {
+		//	printf("a_node is %d, b_node is %d\n", a_node->Exponent, b_node->Exponent);
+			node = (Polynomial)malloc(sizeof(struct Node));
+			node->Coefficient = b_node->Coefficient;
+			node->Exponent = b_node->Exponent;
+			node->Next = NULL;
+				
+			b_node = b_node->Next;	
+			
+		//	printf("Now b_node coe %d, exp %d, is added to s, and the new a_node is %d, b_node is %d\n", \
+			node->Coefficient, node->Exponent, a_node->Exponent, b_node->Exponent);
+		}
+		
+		else if(a_node->Exponent > b_node->Exponent) {
+		//	printf("a_node is %d, b_node is %d\n", a_node->Exponent, b_node->Exponent);
+			node = (Polynomial)malloc(sizeof(struct Node));
+			node->Coefficient = a_node->Coefficient;
+			node->Exponent = a_node->Exponent;
+			node->Next = NULL;
+				
+			a_node = a_node->Next;	
+			
+			//printf("Now a_node coe %d, exp %d, is added to s, and the new a_node is %d, b_node is %d\n", \
+			node->Coefficient, node->Exponent, a_node->Exponent, b_node->Exponent);
+		}
+		
+		else { //a_node->Exponent == b_node->Exponent
+			//printf("a_node is %d, b_node is %d, their exponents are the same\n", a_node->Exponent, b_node->Exponent);
+			int coe = a_node->Coefficient + b_node->Coefficient;
+			if(coe) {
+				node = (Polynomial)malloc(sizeof(struct Node));
+				node->Coefficient = coe;
+				node->Exponent = a_node->Exponent;
+				node->Next = NULL;
+			}
+			
+			a_node = a_node->Next;
+			b_node = b_node->Next;
+		}
+		
+		if(node) {
+		//	printf("OK\n");
+			if(tail) tail->Next = node;
+			else head->Next = node;
+			tail = node;
+		}
+		//Print(head);	
+	}
+	
+	if(a_node) {
+		if(tail) tail->Next = a_node;
+		else head->Next = a_node;
+	}
+	
+	if(b_node) {
+		if(tail) tail->Next = b_node;
+		else head->Next = b_node;
+	}
+	
+	return head;
+}
+
+int main()
+{
+    Polynomial a, b, s;
+    a = Read();
+    Print(a);
+    
+    b = Read();
+    Print(b);
+    
+    s = Add(a, b);
+    Print(s);
+    return 0;
+}
