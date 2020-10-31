@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+
+typedef struct Node *PtrToNode;
+struct Node {
+	ElementType Coefficient;
+	ElementType Exponent;
+	PtrToNode Next;	
+};
+typedef PtrToNode Polynomial;
+typedef PtrToNode Item;
+
+void AttachToTail(ElementType coe, ElementType exp, Polynomial *tail) {
+	Polynomial item = (Polynomial)malloc(sizeof(struct Node));
+	item->Coefficient = coe;
+	item->Exponent = exp;
+	item->Next = NULL;
+	(*tail)->Next = item;
+	*tail = item;
+}
+
+Polynomial readInput() {
+	
+	Polynomial head = (Polynomial)malloc(sizeof(struct Node)), tail;
+	tail = head;
+	
+	int coe, exp;
+	while(scanf("%d%d", &coe, &exp) != EOF) {
+		
+		AttachToTail(coe, exp, &tail);
+	}
+	
+	return head;
+}
+
+void PrintPolynomial(Polynomial P) {
+	Polynomial node = P->Next;
+	if(!node) printf("%d %d\n", 0, 0);
+	else {
+		
+		int first = 1;
+		while(node) {
+			if(first) first = !first;
+			else printf(" ");
+			printf("%d %d", node->Coefficient, node->Exponent);
+			node = node->Next;
+		}
+		printf("\n");
+	}
+}
+
+Polynomial takeDerivative(Polynomial P) {
+	
+	Item i = P->Next;
+	
+	Polynomial derivative = (Polynomial)malloc(sizeof(struct Node)), tail;
+	derivative->Next = NULL;
+	tail = derivative;
+	
+	while(i) {
+		if(i->Exponent) AttachToTail(i->Coefficient * i->Exponent, i->Exponent - 1, &tail);
+		i = i->Next;
+	}
+	
+	return derivative;
+}
+
+void PolyDerivative(Polynomial P) {
+	Item prev = P, t;
+	P = P->Next;
+	
+	while(P) {
+		
+		if(!(P->Exponent)) {
+			t = P;
+			prev->Next = P->Next;
+			free(t);
+			//printf("hasa\n");
+		}
+		else {
+			P->Coefficient = P->Coefficient * P->Exponent;
+			(P->Exponent)--;
+		}
+		
+		if(P) {
+			prev = P;
+			P = P->Next;	
+		}
+		else break;
+	}
+}
+
+int main() {
+	
+	Polynomial P, derivative;
+	
+	P = readInput();
+	//PrintPolynomial(P);
+    
+	PolyDerivative(P);
+	PrintPolynomial(P);
+
+	return 0;
+}
