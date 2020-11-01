@@ -1,0 +1,52 @@
+#include <stdio.h>
+#define MAX 100000
+
+int data[MAX], next[MAX];
+
+void printList(int *List, int num) {
+	
+	for(int i = 0; i < num; i++) {
+		
+		printf("%05d %d ", List[i], data[List[i]]);
+		if(i == num - 1) printf("-1\n");
+		else printf("%05d\n", List[i + 1]);
+	}
+}
+
+void reverse(int *List, int N, int K) {
+	
+	int iter = N / K;
+	for(int i = 0; i < iter; i++) {
+		for(int j = 0; j < K / 2; j++) {
+			int temp = List[K * i + j];
+			List[K * i + j] = List[i * K + K - 1 - j];
+			List[i * K + K - 1 - j] = temp;
+		}	
+	}
+}
+
+int main(){
+	int first_pos, N, K;
+	scanf("%d %d %d", &first_pos, &N, &K);
+	
+	int add, dt, nxt, address[N], list[N];
+	for(int i = 0; i < N; i++) {
+		scanf("%d %d %d", &add, &dt, &nxt);
+		address[i] = add;
+		data[add] = dt;
+		next[add] = nxt;
+	}
+	
+	int i = 0;
+	while(first_pos != -1) {
+		list[i++] = first_pos;
+		first_pos = next[first_pos];		
+	}
+
+	
+	reverse(list, i, K);
+	
+	printList(list, i);
+	
+    return 0;
+}
