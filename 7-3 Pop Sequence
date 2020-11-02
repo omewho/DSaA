@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+typedef int Position;
+
+typedef enum {false, true} bool;
+
+typedef struct stackNode * Stack;
+struct stackNode{
+	ElementType *Data;
+	Position Last;
+	int MaxSize;	
+};
+
+Stack createStack(int MaxSize) {
+	Stack s = (Stack)malloc(sizeof(struct stackNode));
+	s->Data = (ElementType *)malloc(MaxSize * sizeof(ElementType));
+	s->Last = -1;
+	s->MaxSize = MaxSize;
+	
+	return s;
+}
+
+bool isFull(Stack s) {
+	return s->Last == s->MaxSize - 1; 
+} 
+
+bool isEmpty(Stack s) {
+	return s->Last == -1;
+}
+
+void push(Stack s, ElementType X) {
+	if(!isFull(s)) s->Data[++(s->Last)] = X;
+}
+
+void pop(Stack s) {
+	if(!isEmpty(s)) (s->Last)--;
+}
+
+ElementType top(Stack s) {
+	return s->Data[s->Last];
+}
+
+bool isValid(int *seq, int M, int N) {
+	
+	bool res = true;
+	
+	Stack s = createStack(M);
+	
+	int seq_pos = 0;
+	for(int i = 0; i < N; i++) {
+		if(isFull(s)) {
+			res = false;
+			break;
+		}
+		else push(s, i + 1);
+		
+		while(!isEmpty(s) && top(s) == seq[seq_pos]) {
+			pop(s);
+			seq_pos++;
+		}	
+	}
+	if(!isEmpty(s)) res = false;
+	
+	return res;
+}
+
+int main() {
+	
+	int M, N, K;
+	scanf("%d %d %d", &M, &N, &K);
+	
+	int seq[N];
+	
+	for(int i = 0; i < K; i++) {
+		for(int j = 0; j < N; j++) {
+			scanf("%d", &seq[j]);
+		}
+		if(isValid(seq, M, N)) printf("YES\n");
+		else printf("NO\n");
+		
+	}
+	return 0;
+}
