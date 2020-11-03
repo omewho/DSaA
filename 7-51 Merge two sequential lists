@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+
+typedef struct ListNode *PtrToNode;
+struct ListNode {
+	ElementType Data;
+	PtrToNode Next;
+};
+
+typedef PtrToNode List;
+
+List readInput() {
+	
+	PtrToNode head = (PtrToNode)malloc(sizeof(struct ListNode)), tail;
+	head->Next = NULL;
+	
+	int num;
+	scanf("%d", &num);
+	while(num != -1) {
+		PtrToNode node = (PtrToNode)malloc(sizeof(struct ListNode));
+		node->Data = num;
+		node->Next = NULL;
+		
+		if(!(head->Next)) head->Next = node;
+		else tail->Next = node;
+		
+		tail = node;
+		
+		scanf("%d", &num);
+	}
+	
+	return head;
+}
+
+void printList(List L) {
+	
+	PtrToNode node = L->Next;
+	
+	if(!node) printf("NULL");
+	
+	else {
+		int first = 1;
+		while(node) {
+			if(first) first = 0;
+			else printf(" ");
+			
+			printf("%d", node->Data);
+			node = node->Next;
+		}		
+	}
+	printf("\n");
+}
+
+List merge(List L1, List L2) {
+	
+	PtrToNode head;
+	PtrToNode nd1 = L1->Next, nd2 = L2->Next, newnode, node;
+	
+	if(!nd1) head = L2;
+	else if(!nd2) head = L1;
+	
+	else {
+		if(nd1->Data < nd2->Data) {
+			head = L1;
+			newnode = nd1;
+			
+			nd1 = nd1->Next;
+		}
+		
+		else {
+			head = L2;
+			newnode = nd2;
+			nd2 = nd2->Next;
+		}
+		
+		while(nd1 && nd2){
+			if(nd1->Data < nd2->Data) {
+				node = nd1;
+				nd1 = nd1->Next;
+			}
+			else {
+				node = nd2;
+				nd2 = nd2->Next;
+			}
+			newnode->Next = node;
+			newnode = node;
+		}
+		
+		if(nd1) newnode->Next = nd1;
+		if(nd2) newnode->Next = nd2;
+	}
+	
+	
+	return head;
+}
+
+int main() {
+	List L1, L2, L;
+	L1 = readInput();
+	
+	L2 = readInput();
+	
+//	printList(L1);
+//	printList(L2);
+	
+	L = merge(L1, L2);
+	printList(L);
+//	printList(L1);
+//	printList(L2);
+
+	return 0;
+}
