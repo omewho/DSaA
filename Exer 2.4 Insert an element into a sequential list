@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+
+typedef struct Node *PtrToNode;
+struct Node {
+	ElementType Data;
+	PtrToNode Next;
+};
+
+typedef PtrToNode List;
+
+List Read() {
+	
+	PtrToNode head = (PtrToNode)malloc(sizeof(struct Node)), tail;
+	head->Next = NULL;
+	
+	int n, num;
+	scanf("%d", &n);
+	for(int i = 0; i < n; i++) {
+		PtrToNode node = (PtrToNode)malloc(sizeof(struct Node));
+		scanf("%d", &num);
+		node->Data = num;
+		node->Next = NULL;
+		
+		if(!(head->Next)) head->Next = node;
+		else tail->Next = node;
+		
+		tail = node;	
+	}
+	
+	return head;
+}
+
+void Print(List L) {
+	
+	PtrToNode node = L->Next;
+	
+	if(!node) printf("NULL");
+	
+	else {
+		int first = 1;
+		while(node) {
+			if(first) first = 0;
+			else printf(" ");
+			
+			printf("%d", node->Data);
+			node = node->Next;
+		}		
+	}
+	printf("\n");
+}
+
+List Insert( List L, ElementType X );
+
+int main() {
+	
+    List L;
+    ElementType X;
+    L = Read();
+    scanf("%d", &X);
+    L = Insert(L, X);
+    Print(L);
+    
+    return 0;
+}
+
+List Insert( List L, ElementType X ) {
+	PtrToNode cur = (PtrToNode)malloc(sizeof(struct Node)), prev;
+	cur->Data = X;
+	
+	prev = L;
+	
+	while(prev->Next && prev->Next->Data < X) {
+		
+		prev = prev->Next;
+	}
+	
+	cur->Next = prev->Next;
+	prev->Next = cur;
+	
+	return L;
+}
