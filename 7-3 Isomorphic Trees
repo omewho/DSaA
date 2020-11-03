@@ -1,0 +1,101 @@
+#include <stdio.h>
+#define Null -1
+#define MAXN 10
+
+typedef int BinTree;
+typedef char ElementType;
+typedef enum {false, true} bool;
+
+typedef struct treeNode * Tree;
+
+typedef struct treeNode{
+	ElementType Data;
+	BinTree Left;
+	BinTree Right;	
+} BT;  //typedef ... arr[] is erranous.
+
+BT T1[MAXN], T2[MAXN];
+
+BinTree readInput(Tree T) {
+	
+	BinTree root = Null;
+	
+	int N;
+	scanf("%d", &N);
+	
+	if(N) {
+		
+		bool isNotRoot[N];
+		for(int i = 0; i < N; i++) {
+			isNotRoot[i] = 0;
+		}
+		
+		char ch, lch, rch;
+		
+		for(int i = 0; i < N; i++) {
+			getchar();
+			scanf("%c %c %c", &ch, &lch, &rch);
+			//getchar();
+			T[i].Data = ch;
+			//printf("%c %c %c\n", ch, lch, rch);
+			
+			if(lch == '-') T[i].Left = Null;
+			else {
+				T[i].Left = lch - '0';
+				isNotRoot[T[i].Left] = true;
+			}
+			
+			if(rch == '-') T[i].Right = Null;
+			else {
+				T[i].Right = rch - '0';
+				isNotRoot[T[i].Right] = true;			
+			}
+		}
+		
+		for(int i = 0; i < N; i++) {
+			//printf("%d ", isNotRoot[i]);
+			if(!isNotRoot[i]) {
+				root = i;
+				break;
+			} 
+		}
+		//printf("\n");		
+	}
+	//printf("%d\n", root);
+	return root;
+}
+
+bool isomorphic(BinTree rt1, BinTree rt2) {
+	
+	if(rt1 == Null && rt2 == Null) return true;
+	if((rt1 == Null && rt2 != Null) || (rt1 != Null && rt2 == Null)) return false;
+	
+	if(rt1 != Null && rt2 != Null) {
+		if(T1[rt1].Data == T2[rt2].Data) {
+			if(  T1[rt1].Left == Null && T2[rt2].Left == Null  ) return isomorphic(T1[rt1].Right, T2[rt2].Right);
+			
+			if(  T1[rt1].Left != Null && T2[rt2].Left != Null  ) {
+				if( T1[T1[rt1].Left].Data == T2[T2[rt2].Left].Data  ) \
+					return (isomorphic(T1[rt1].Left, T2[rt2].Left) && isomorphic(T1[rt1].Right, T2[rt2].Right));
+			}
+			
+			return ( (isomorphic(T1[rt1].Left, T2[rt2].Right))  && (isomorphic(T1[rt1].Right, T2[rt2].Left)));
+			
+		}
+		
+		else return false;
+	}
+}
+
+int main() {
+	
+	BinTree rt1, rt2;
+	
+	rt1 = readInput(T1);
+	rt2 = readInput(T2);
+	
+	if(isomorphic(rt1, rt2)) printf("Yes\n");
+	else printf("No\n");
+	
+	return 0;
+}
