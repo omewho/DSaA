@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAXSIZE 10
+typedef enum {false, true} bool;
+typedef int ElementType;
+
+typedef int Position;
+typedef struct LNode *List;
+struct LNode {
+    ElementType Data[MAXSIZE];
+    Position Last; /* 保存线性表中最后一个元素的位置 */
+};
+
+List ReadInput() {
+	List L = (List)malloc(sizeof(struct LNode));
+	L->Last = -1;
+	
+	int n, num;
+	scanf("%d", &n);
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &num);
+		L->Data[++(L->Last)] = num;
+	}
+	
+	return L;
+}
+
+void PrintList( List L ) {
+	for(int i = 0; i <= L->Last; i++) {
+		if(i != 0) printf(" ");
+		printf("%d", L->Data[i]);
+	}
+	printf("\n");
+	printf("Last = %d\n", L->Last);
+	
+}
+
+
+bool Insert( List L, ElementType X );
+
+int main()
+{
+    List L;
+    ElementType X;
+
+    L = ReadInput();
+    PrintList( L );
+    
+    scanf("%d", &X);
+    if ( Insert( L, X ) == false )
+        printf("Insertion failed.\n");
+    PrintList( L );
+
+    return 0;
+}
+
+bool Insert( List L, ElementType X ) {
+	
+	if(L->Last + 1 == MAXSIZE ) return false;
+	
+	Position pos = 0, p;
+	
+	while(L->Data[pos] > X) pos++;
+	
+	if(L->Data[pos] == X ) return false;
+	//printf("pos is %d\n", pos);
+	for(p = L->Last; p >= pos; p--) {
+		//printf("p is %d, L->Data[%d] is %d\n", p, p, L->Data[p]);
+		L->Data[p + 1] = L->Data[p];		
+	}
+	
+	L->Data[pos] = X;
+	(L->Last)++;
+	 
+	return true;
+}
