@@ -1,0 +1,168 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ElementType int
+#define ERROR 1e5
+
+typedef enum { push, pop, inject, eject, end } Operation;
+
+typedef struct Node *PtrToNode;
+struct Node {
+    ElementType Element;
+    PtrToNode Next, Last;
+};
+
+typedef struct DequeRecord *Deque;
+struct DequeRecord {
+    PtrToNode Front, Rear;
+};
+
+Deque CreateDeque();
+int Push( ElementType X, Deque D );
+ElementType Pop( Deque D );
+int Inject( ElementType X, Deque D );
+ElementType Eject( Deque D );
+
+Operation GetOp() {/* details omitted */
+	
+	char op[7];
+	scanf("%s", op);
+	//printf("%s\n", op);
+	switch ( op[2] ) {
+		case 's': return push;
+			break;
+		case 'p': return pop;
+			break;
+		case 'j': return inject;
+			break;
+		case 'e': return eject;
+			break;	
+		case 'd': return end;		
+	}
+									
+}
+         
+void PrintDeque( Deque D ) {/* details omitted */
+	
+	printf("Inside Deque:");
+	PtrToNode node = D->Front->Next;
+	while(node) {
+		printf(" %d", node->Element);
+		node = node->Next;
+	}
+	printf("\n");
+} 
+
+int main()
+{
+    ElementType X;
+    Deque D;
+    int done = 0;
+
+    D = CreateDeque();
+    while (!done) {
+        switch(GetOp()) {
+        case push: 
+            scanf("%d", &X);
+            if (!Push(X, D)) printf("Memory is Full!\n");
+            break;
+        case pop:
+            X = Pop(D);
+            if ( X==ERROR ) printf("Deque is Empty!\n");
+            break;
+        case inject: 
+            scanf("%d", &X);
+            if (!Inject(X, D)) printf("Memory is Full!\n");
+            break;
+        case eject:
+            X = Eject(D);
+            if ( X==ERROR ) printf("Deque is Empty!\n");
+            break;
+        case end:
+            PrintDeque(D);
+            done = 1;
+            break;
+        }
+        //PrintDeque(D);
+    }
+    return 0;
+}
+
+
+Deque CreateDeque() {
+	PtrToNode head = (PtrToNode)malloc(sizeof(struct Node));
+	head->Next = NULL;
+	head->Last = NULL;
+	
+	Deque dq = (Deque)malloc(sizeof(struct DequeRecord));
+	dq->Front = head;
+	dq->Rear = head;
+	
+	return dq;	
+}
+
+int Push( ElementType X, Deque D ) {
+	PtrToNode node = (PtrToNode)malloc(sizeof(struct Node));
+	if(!node) return 0;
+	
+	node->Element = X;
+	node->Last = D->Front;
+	node->Next = D->Front->Next;
+	
+	if(D->Front->Next) D->Front->Next->Last = node;
+	else D->Rear = node;
+	
+	D->Front->Next = node;
+	
+	return 1;
+}
+
+ElementType Pop( Deque D ) {
+	
+	ElementType res = ERROR;
+	
+	if(D->Front != D->Rear) {
+		PtrToNode node = D->Front->Next;
+		
+		res = node->Element;
+		D->Front->Next = node->Next; 
+		if(node->Next) node->Next->Last = D->Front;
+		else D->Rear = D->Front;
+		free(node);		
+	} 
+
+	return res;
+}
+
+int Inject( ElementType X, Deque D ) {
+	
+	PtrToNode node = (PtrToNode)malloc(sizeof(struct Node));
+	if(!node) return 0;
+	
+	node->Element = X;
+	node->Next = NULL;
+	node->Last = D->Rear;
+	
+	D->Rear->Next = node;
+	D->Rear = node;
+	
+	return 1;
+}
+
+
+ElementType Eject( Deque D ) {
+	
+	ElementType res = ERROR;
+	
+	if( D->Front != D->Rear ) {
+		
+		res = D->Rear->Element;
+		PtrToNode node = D->Rear;
+		
+		D->Rear = D->Rear->Last;
+		D->Rear->Next = NULL;
+		free(node);
+	}
+	
+	return res;
+}
