@@ -1,0 +1,52 @@
+#include <stdio.h>
+#define MAX 100
+
+void readInput(char *str) {
+	
+    int i = 0;
+    while((str[i] = getchar()) != '\n') i++;
+    str[i] = '\0';
+}
+
+void verify(char *str, int max) {
+	int i = 0, p = 0, err = 0;
+	while(str[i]) {
+		if(str[i] == 'S') {
+			if( p == max) {
+				printf("NO\n");
+				err = 1;
+				break;
+			}
+			else p++;
+		} 
+		else if(str[i] == 'X') {
+			if(!p) {
+				printf("NO\n");
+				err = 1;
+				break;
+			}
+			else p--;
+		}
+		i++;
+	}
+	if(!err) {
+		if(p) printf("NO\n");
+		else printf("YES\n");		
+	}
+
+}
+
+int main() {
+    
+    char str[MAX + 1];
+    int num, max;
+    scanf("%d %d\n", &num, &max);
+    for(int i = 0; i < num; i++) {
+        readInput(str);
+        //printf("%s\n", str);
+        verify(str, max);
+    }
+    
+    
+    return 0;
+}
