@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main() {
+    
+    int n, num, this_sum = 0, max_sum = 0;
+    scanf("%d", &n);
+    
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &num);
+        this_sum += num;
+        if(this_sum > max_sum) max_sum = this_sum;
+        else if(this_sum < 0) this_sum = 0;
+    }
+    
+    printf("%d\n", max_sum);
+    
+    return 0;
+}
