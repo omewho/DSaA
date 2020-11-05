@@ -1,0 +1,126 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef char ElementType;
+
+typedef struct Node *PtrToNode;
+struct Node {
+    ElementType Data; /* 存储结点数据 */
+    PtrToNode   Next; /* 指向下一个结点的指针 */
+};
+typedef PtrToNode List; /* 定义单链表类型 */
+
+void readString( List L) {
+	PtrToNode tail = NULL;
+	
+	char ch;
+	while((ch = getchar()) != '\n') {
+		PtrToNode node = (PtrToNode)malloc(sizeof(struct Node));
+		node->Data = ch;
+		node->Next = NULL;
+		
+		if(!(tail)) L->Next = node;
+		else tail->Next = node;
+		
+		tail = node;
+	}	
+}
+
+void ReadInput( List L1, List L2 ) {
+	readString(L1);
+	
+	readString(L2);
+
+}/* 裁判实现，细节不表 */
+
+void PrintString(List L) {
+	PtrToNode node = L->Next;
+	
+	while(node) {
+		printf("%c", node->Data);
+		node = node->Next;
+	}
+	printf("\n");
+}
+
+void PrintLists(List L1, List L2) {
+	PrintString(L1);
+	PrintString(L2);
+}
+
+void PrintSublist( PtrToNode StartP ) {
+	while(StartP) {
+		printf("%c", StartP->Data);
+		StartP = StartP->Next;
+	}
+	printf("\n");
+}/* 裁判实现，细节不表 */
+PtrToNode Suffix( List L1, List L2 );
+
+int main()
+{
+    List L1, L2;
+    PtrToNode P;
+
+    L1 = (List)malloc(sizeof(struct Node));
+    L2 = (List)malloc(sizeof(struct Node));
+    
+    L1->Next = L2->Next = NULL;
+    
+    ReadInput( L1, L2 );
+    PrintLists(L1, L2);
+    
+    P = Suffix( L1, L2 );
+    PrintSublist( P );
+
+    return 0;
+}
+
+PtrToNode Suffix( List L1, List L2 ) {
+	
+	PtrToNode L, start = NULL, node1 = L1->Next, node2 = L2->Next, other;
+	int m = 0, n = 0, diff;
+	
+	while(node1) {
+		m++;
+		node1 = node1->Next;
+	}
+	
+	while(node2) {
+		n++;
+		node2 = node2->Next;
+	}
+	
+	diff = m - n;
+	
+	if(diff < 0) {
+		diff = -diff;
+		L = L2->Next;
+		other = L1->Next;
+	}
+	else {
+		L = L1->Next;
+		other = L2->Next;
+	}
+	
+	for(int i = 0; i < diff; i++) {
+		L = L->Next;
+	}	
+
+//	printf("L = %c\n", L->Data);
+//	printf("diff = %d\n", diff);
+//	PrintSublist(L);
+//	PrintSublist(other);
+	
+	while(L && other) {
+		if(L->Data == other->Data) {
+			if(!start) start = L;
+			//printf("%c\n", L->Data);	
+		}
+		else if(start) start = NULL;
+		L= L->Next;
+		other = other->Next;
+	}
+	
+	return start;
+}
