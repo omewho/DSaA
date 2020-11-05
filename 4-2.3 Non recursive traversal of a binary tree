@@ -1,0 +1,203 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef enum { false, true } bool;
+
+typedef char ElementType;
+typedef struct TNode *Position;
+typedef Position BinTree;
+struct TNode{
+    ElementType Data;
+    BinTree Left;
+    BinTree Right;
+    int flag;
+};
+
+/*------堆栈的定义-------*/
+typedef Position SElementType;
+typedef struct SNode *PtrToSNode;
+struct SNode {
+	SElementType Data; //Data is of type (struct TNode *) 
+	PtrToSNode Next;
+};
+typedef PtrToSNode Stack;
+
+/* 裁判实现，细节不表 */
+Stack CreateStack() {
+	Stack s = (Stack)malloc(sizeof(struct SNode));
+	s->Next = NULL;
+	return s;
+}
+
+bool IsEmpty( Stack S ) {
+	return S->Next == NULL; 
+}
+
+bool Push( Stack S, SElementType X ) {
+	
+	PtrToSNode snode = (PtrToSNode)malloc(sizeof(struct SNode));
+	if(!snode) return false;
+	
+	snode->Data = X;
+//	snode->Data = (BinTree)malloc(sizeof(struct TNode));
+//	snode->Data->Data = X->Data;
+//	snode->Data->flag = X->flag;
+//	snode->Data->Left = X->Left;
+//	snode->Data->Right = X->Right;
+	
+	snode->Next = S->Next;
+	
+	S->Next = snode;	
+	return true;
+}
+
+SElementType Pop( Stack S ) {
+	PtrToSNode top = S->Next;
+	if(!IsEmpty( S )) {
+		SElementType topElem = top->Data;
+		S->Next = top->Next;
+		free(top);
+		
+		return topElem;
+	}	
+}
+ /* 删除并仅返回S的栈顶元素 */
+SElementType Peek( Stack S ) {
+	
+	return S->Next->Data;	
+}/* 仅返回S的栈顶元素 */
+/*----堆栈的定义结束-----*/
+
+BinTree CreateBinTree() {
+	
+	ElementType ch = getchar();
+	if(ch == '-') return NULL;
+	
+	BinTree bt = (BinTree)malloc(sizeof(struct TNode));
+	bt->Data = ch;
+	
+	bt->flag = 0;
+	bt->Left = CreateBinTree();
+	bt->Right = CreateBinTree();
+	return bt;
+	
+} /* 裁判实现，细节不表 */
+
+void InorderTraversal( BinTree BT );
+void PreorderTraversal( BinTree BT );
+void PostorderTraversal( BinTree BT );
+
+void myInorderTraversal( BinTree BT ) {
+	if(BT) {
+		myInorderTraversal(BT->Left);
+		printf(" %c", BT->Data);
+		myInorderTraversal(BT->Right);
+	}
+}
+
+void myPreorderTraversal( BinTree BT ) {
+	if(BT) {
+		printf(" %c", BT->Data);
+		myPreorderTraversal(BT->Left);
+		myPreorderTraversal(BT->Right);
+	}
+}
+
+void myPostorderTraversal( BinTree BT ) {
+	if(BT) {
+		myPostorderTraversal(BT->Left);
+		myPostorderTraversal(BT->Right);
+		printf(" %c", BT->Data);
+	}
+}
+
+int main() {
+    BinTree BT = CreateBinTree();
+    
+    Stack S = CreateStack();
+    Push(S, BT);
+    printf("bt is %c\n", Peek(S)->Data);
+    Push(S, BT->Left);
+    printf("bt is %c\n", Peek(S)->Data);
+    
+    printf("Inorder:");    InorderTraversal(BT);    printf("\n");
+    printf("Preorder:");   PreorderTraversal(BT);   printf("\n");
+    printf("Postorder:");  PostorderTraversal(BT);  printf("\n");
+    
+    printf("Inorder:");    myInorderTraversal(BT);    printf("\n");
+    printf("Preorder:");   myPreorderTraversal(BT);   printf("\n");
+    printf("Postorder:");  myPostorderTraversal(BT);  printf("\n");
+    return 0;
+}
+
+//Sample: ABD--FE---CG-H--I--
+
+void InorderTraversal( BinTree BT ) {
+	
+	Stack s = CreateStack();
+	//printf("Hello!\n");
+	BinTree T = BT;
+	
+	while(T || !IsEmpty(s)) {
+		//printf("Hohohoho!\n");
+		while(T) {
+			
+			Push(s, T);
+			//printf("BT is %c\n", Peek(s)->Data);
+			T = T->Left; 
+		}
+		
+		printf(" %c", (Peek(s))->Data);
+		
+		T = Pop(s);
+		//printf("T is %c", T->Data);
+		T = T->Right;
+	}
+}
+
+void PreorderTraversal( BinTree BT ) {
+	
+	Stack s = CreateStack();
+	//printf("Hello!\n");
+	BinTree T = BT;
+	
+	while(T || !IsEmpty(s)) {
+		
+		while(T) {
+			
+			Push(s, T);
+			printf(" %c", Peek(s)->Data);
+			T = T->Left; 
+		}
+		
+		T = Pop(s);
+		T = T->Right;
+	}
+}	
+
+void PostorderTraversal( BinTree BT ) {
+	
+	Stack s = CreateStack();
+	//printf("Hello!\n");
+	BinTree T = BT;
+	
+	while(T || !IsEmpty(s)) {
+		
+		while(T) {
+			Push(s, T);
+			T = T->Left; 
+		}
+
+		T = Peek(s);
+		
+		if(T->flag) {
+			T = Pop(s);
+			printf(" %c", T->Data);
+			T = NULL;
+		}
+		else {
+			 
+			T->flag = 1;
+			T = T->Right;
+		}
+	}
+}
