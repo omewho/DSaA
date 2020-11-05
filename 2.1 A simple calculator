@@ -1,0 +1,38 @@
+#include <stdio.h>
+
+int main() {
+    
+    int num, num1, error= 0;
+    char op;
+    scanf("%d", &num);
+    //printf("num is %d\n", num);
+    scanf("%c", &op);
+    while(op != '=') {
+    	//printf("%c", op);
+        scanf("%d", &num1);
+        //printf("%d\n", num1);
+        switch( op ){
+            case '+': num = num + num1;
+                break;
+            case '-': num = num - num1;
+                break;
+            case '*': num = num * num1;
+                break;
+            case '/': {
+                if(!num1) {
+                	printf("ERROR\n");
+                	error = 1;
+				}
+				else num = num / num1;
+			}
+				break;
+			default:
+				printf("ERROR\n");
+				error = 1;
+        }
+        scanf("%c", &op);
+    }
+    if(!error)printf("%d\n", num);
+    
+    return 0;
+}
