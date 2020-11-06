@@ -1,0 +1,48 @@
+#include <stdio.h>
+#define MINDATA -10001
+
+void insert(int *H, int *nums, int n) {
+	
+	//printf("ha\n");
+	for(int i = 0; i < n; i++) {
+		
+		int j = i + 1;
+		//printf("i is %d, nums[%d] is %d, j is %d, H[%d] is %d\n", i, i, nums[i], j, j, H[j]);
+		while(H[j / 2] > nums[i]) {
+			H[j] = H[j / 2];
+			//printf("Now, H[%d] is %d\n", j, H[j]);
+			j /= 2;
+		} 
+		H[j] = nums[i];	
+	}
+}
+
+int main() {
+    
+    int n, m;
+    scanf("%d %d", &n, &m);
+    
+    int nums[n], query[m], H[n + 1];
+    H[0] = MINDATA;
+    
+    for(int i = 0; i < n; i++) {
+    	scanf("%d", &nums[i]);
+	}
+	
+	for(int i = 0; i < m; i++) {
+		scanf("%d", &query[i]);
+	}
+	
+	insert(H, nums, n);
+	
+	for(int i = 0; i < m; i++) {
+		
+		for(int j = query[i]; j >= 1; j /= 2) {
+			if(j != query[i]) printf(" ");
+			printf("%d", H[j]);
+		}
+		printf("\n");
+	}
+    
+    return 0;
+}
