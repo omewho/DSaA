@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h> 
+#include <string.h>
+
+typedef double ElementType;
+typedef enum{ number, operand
+} OprType;
+#define Infinity 1e8
+#define Max_Expr 31   /* max size of expression */
+
+void readInput(char *str) {
+	
+	scanf("%s", str);
+}
+
+OprType getType(char *str) {
+	
+	if(strlen(str) == 1 && (str[0] == '+' || str[0] == '-' || str[0] == '*' || str[0] == '/')) return operand;
+	else if(isdigit(str[0]) || (strlen(str) > 1 && isdigit(str[1]))) return number;
+}
+
+ElementType EvalPrefix( );
+
+int main()
+{
+    ElementType v;
+    
+    v = EvalPrefix( );
+    if ( v < Infinity )
+        printf("%.1f\n", v);
+    else
+        printf("ERROR\n");
+    return 0;
+}
+
+ElementType EvalPrefix( ) {
+	
+	ElementType res = Infinity, num1, num2;
+	
+	char expr[Max_Expr];
+	
+	readInput(expr);
+	//printf("%s\n", expr);
+	
+	OprType op = getType(expr);
+	if(!op) return atof(expr);
+	else { // operands
+		num1 = EvalPrefix(), num2 = EvalPrefix();
+		switch(expr[0] ) {
+			case '+': return num1 + num2;
+			case '-': return num1 - num2;
+			case '*': return num1 * num2;
+			case '/': 
+				if(num2 == 0)	return Infinity;
+				else return num1 / num2;
+											
+		}
+			
+	}
+	return res;
+}
