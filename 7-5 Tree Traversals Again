@@ -1,0 +1,121 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define ERROR 0
+
+typedef int TNNum;
+
+typedef TNNum ElementType;
+
+typedef struct StackNode * PtrToStackNode;
+typedef struct StackNode{
+	ElementType Element;
+	PtrToStackNode Next;
+}StackNode;
+typedef PtrToStackNode Stack;
+
+Stack createAStack(){
+	PtrToStackNode sNode = (PtrToStackNode)malloc(sizeof(struct StackNode));
+	sNode->Next = NULL;
+	return sNode;
+}
+
+int isEmpty(Stack S){
+	return S->Next == NULL;
+}
+
+void push(Stack S, ElementType X){
+	PtrToStackNode sNode = (PtrToStackNode)malloc(sizeof(struct StackNode));
+	sNode->Element = X;
+	sNode->Next = S->Next;
+	S->Next = sNode;	
+}
+
+ElementType pop(Stack S){
+	ElementType rtn = ERROR;
+	if(!isEmpty(S)){
+		PtrToStackNode sNode = S->Next;
+		S->Next = sNode->Next;
+		rtn = sNode->Element;
+		free(sNode);
+	}
+	return rtn;
+}
+
+void postOrderT(TNNum root, TNNum start, TNNum end, TNNum *in, TNNum * pre, Stack S);
+
+int main(){
+	
+	int N, first = 1, iter, iterpre = 0, iterin = 0;	
+	TNNum num;
+	
+	scanf("%d", &N);		
+	TNNum preOrder[N], inOrder[N], postOrder[N];
+	
+	Stack S = createAStack();
+	
+	char str[5];
+	
+	for(iter = 0; iter < 2 * N; iter++){
+		scanf("%s", str);
+		if(str[1] == 'u') {
+			scanf("%d", &num);
+			//printf("num is %d\n", num);
+			preOrder[iterpre++] = num;
+			push(S, num);
+		//	printf("preOrder[%d] is %d\n", iterpre - 1, preOrder[iterpre - 1]);
+		}
+		
+		else {
+			inOrder[iterin++] = pop(S);
+		//	printf("inOrder[%d] is %d\n", iterin - 1, inOrder[iterin - 1]);
+		}	
+	}
+	
+//	for(iter = 0; iter < N; iter++){
+//		if(first) first = 0;
+//		else printf(" ");
+//		printf("%d", preOrder[iter]);
+//	}
+//	first = 1;
+//	printf("\n");
+//	
+//	for(iter = 0; iter < N; iter++){
+//		if(first) first = 0;
+//		else printf(" ");
+//		printf("%d", inOrder[iter]);
+//	}
+//	printf("\n");
+//	
+//	first = 1;
+	
+	postOrderT(0, 0, N - 1, inOrder, preOrder, S);
+	
+	for(iter = 0; iter < N; iter++){
+		postOrder[N - 1 - iter] = pop(S);
+	}
+	
+	for(iter = 0; iter < N; iter++){
+		if(first) first = 0;
+		else printf(" ");
+		printf("%d", postOrder[iter]);
+	}
+	printf("\n");
+	
+	return 0;
+}
+
+void postOrderT(TNNum root, TNNum start, TNNum end, TNNum *in, TNNum * pre, Stack S){
+
+	if(!(start > end)){
+		TNNum i = start;
+		while(i < end && in[i] != pre[root]){
+			i++;
+		}
+	//	printf("i is %d ", i);
+		postOrderT(root + 1, start, i - 1, in, pre, S);
+		postOrderT(root + 1 + i - start, i + 1, end, in, pre, S);
+		push(S, pre[root]);
+	}
+	
+	
+}
