@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef double ElementType;
+#define Infinity 1e8
+#define Max_Expr 30   /* max size of expression */
+
+ElementType EvalPostfix( char *expr );
+
+void printStack(ElementType *Stack, int top) {
+	
+	for(int i = 0; i <= top; i++){
+		if(i != 0) printf(" ");
+		printf("%.2f", Stack[i]);
+	}
+	printf("\n");
+}
+
+int main()
+{
+    ElementType v;
+    char expr[Max_Expr];
+    gets(expr);
+    v = EvalPostfix( expr );
+    if ( v < Infinity )
+        printf("%f\n", v);
+    else
+        printf("ERROR\n");
+    return 0;
+}
+
+ElementType EvalPostfix( char *expr ) {
+	
+	ElementType res;
+	ElementType stack[Max_Expr];
+	int top = -1;
+	
+	int i = 0, j = 0, error = 0;
+	char op[Max_Expr];
+	
+	while(expr[i] != '\0') {
+		
+		ElementType num1, num2;
+		
+		j = 0;
+		while((op[j] = expr[i++]) == ' ');
+		
+		while(op[j] != ' ' && op[j] != '\0') op[++j] = expr[i++];
+		
+		if(op[j] == '\0') i--;
+		op[j] = '\0';
+		//printf("op is %s\n", op);
+		
+		if((op[0] >= '0' && op[0] <= '9') || (op[1] >= '0' && op[1] <= '9')) {
+			//printf("the num is %s\n", op);
+			stack[++top] = atof(op);
+			//printStack(stack, top);
+		}
+		else {
+			if(top) {
+				num2 = stack[top--];
+				num1 = stack[top];
+				//printf("num1 is %.2f, num2 is %.2f\n", num1, num2);
+				switch(op[0]) {
+					case '+': stack[top] = num1 + num2;
+						break;
+					case '-': stack[top] = num1 - num2;
+						break;
+					case '*': stack[top] = num1 * num2;
+						break;
+					case '/': 
+						if(num2 == 0) {
+							//printf("Divided by zero!\n");
+							error = 1;
+						}
+						else stack[top] = num1 / num2;
+						break;
+				}
+			}
+			else {
+				error = 1;
+				break;
+			}	
+		}
+	}
+	if(top) error = 1;
+	
+	if(error) res = Infinity;
+	else res = stack[top];
+	
+	
+	return res;
+}
