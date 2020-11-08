@@ -1,0 +1,130 @@
+#include <stdio.h>
+#define MAXN 1000
+#define MINDATA -10001
+
+int H[1001] = {MINDATA};
+
+void readWord(char *str) {
+	scanf("%s", str);
+}
+
+int findPos(int num, int N) {
+	int res, found = 0;
+	for(int i = 1; i <= N; i++) {
+		if(H[i] == num) {
+			res = i;
+			found = 1;
+			//printf("i is %d\n", i);
+			break;
+		}
+	}
+	if(found) return res;
+	else return 0;
+}
+
+void createHeap(int N) {
+	
+	int data;
+	for(int i = 1; i <= N; i++) {
+		
+		int j = i;
+		scanf("%d", &data);
+		while(H[j / 2] > data) {
+			H[j] = H[j / 2];
+			j /= 2;
+		}
+		H[j] = data;
+	}
+}
+
+void printHeap(int N) {
+	for(int i = 1; i <= N; i++) {
+		if(i != 1) printf(" ");
+		printf("%d", H[i]);
+	}
+	printf("\n");
+}
+
+void judge(int M, int N) {
+	for(int i = 0; i < M; i++) {
+		int num1;
+		char word[10];
+		scanf("%d", &num1);
+		readWord(word);
+		//printf("%s\n", word);
+		if(word[0] == 'a') { // x and y are siblings
+			int num2;
+			scanf("%d", &num2);
+			
+			readWord(word);
+			//printf("%s\n", word);
+			
+			readWord(word);
+			//printf("this word is %s\n", word);
+			if(findPos(num1, N) / 2 == findPos(num2, N) / 2) printf("T\n");
+			else printf("F\n");
+			//printf("pos1 is %d, pos2 is %d\n", findPos(num1, N), findPos(num2, N));
+		}
+		else if(word[0] == 'i') {
+			readWord(word);
+			//printf("%s\n", word);
+			
+			if(word[0] == 'a') { // x is a child of y
+				readWord(word);
+				//printf("salf %s\n", word);
+				readWord(word);
+				//printf("haha %s\n", word);
+				int num2, pos1, pos2;
+				scanf("%d", &num2);
+				//printf("num1 is %d, num2 is %d\n", num1, num2);
+					
+				pos1 = findPos(num1, N);
+				pos2 = findPos(num2, N);
+				//printf("Pos1 is %d, pos2 is %d\n", pos1, pos2);
+				if(pos1 / 2 == pos2) printf("T\n");
+				else printf("F\n");
+			}
+			else if(word[0] == 't') {
+				//printf("word is asdflkafds %s\n", word);
+									
+				readWord(word);
+				//printf("%s\n", word);
+				
+				if(word[0] == 'p') { //x is the parent of y
+					readWord(word);
+					//printf("%s\n", word);
+					
+					int num2, pos1, pos2;
+					scanf("%d", &num2);
+					pos1 = findPos(num1, N);
+					pos2 = findPos(num2, N);
+					//printf("num1 is %d, num2 is %d\n", num1, num2);
+						
+					if(pos2 / 2 == pos1) printf("T\n");
+					else printf("F\n");
+				}
+				else {// x is the root
+					//printf("The word is %s\n", word);
+					
+					int pos = findPos(num1, N);
+					//printf("root %d pos is %d\n", num1, pos);
+					if(pos == 1) printf("T\n");
+					else printf("F\n"); 
+				}
+			}
+		}	
+	}
+}
+
+int main() {
+	
+	int N, M;
+	scanf("%d %d", &N, &M);
+	createHeap(N);
+	
+	//printHeap(N);
+	
+	judge(M, N);
+	
+	return 0;
+}
