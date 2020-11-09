@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <string.h>
+#define MAX 150
+
+char Stack[MAX] = {'\0'};
+int top = -1;
+
+char getPre(char ch) {
+	if(ch == '>') return '<';
+	if(ch == ')') return '(';
+	if(ch == ']') return '[';
+	return '{';
+}
+
+void printChar(char ch) {
+	if(ch == '<') printf("/*");
+	else if(ch == '>') printf("*/");
+	else printf("%c", ch);
+}
+
+void readLine(char *str) {
+	
+	int i = 0;
+	while((str[i] = getchar()) != '\n') i++;
+	str[i] = '\0';
+}
+
+void printString (char *str) {
+	printf("%s\n", str);
+}
+
+void getResult(int *error, int *top, char ch) {
+	if(*top == -1) {
+		
+		printf("NO\n");
+		printf("?-");
+		printChar(ch);
+		printf("\n");
+		*error = 1;
+	}
+	else if(*top >= 0) {
+		if(Stack[*top] == getPre(ch)) (*top)--;
+		else if(Stack[*top] != getPre(ch)) {
+			
+			printf("NO\n");
+			printChar(Stack[*top]);
+			printf("-?\n");
+			*error = 1;
+		}
+	}
+}
+
+
+int main() {
+	char str[MAX];
+	int error = 0;
+	
+	readLine(str);
+	
+	while(!(strlen(str) == 1 && str[0] == '.')) {
+		//printString(str);
+		int i = 0;
+		while(str[i] != '\0') {
+			if(str[i] == '(' || str[i] == '[' || str[i] == '{') Stack[++top] = str[i];
+			
+			else if(str[i] == '/' && str[i + 1] == '*') {
+				Stack[++top] = '<';
+				i++;
+			}
+			else {
+				if(str[i] == '*' && str[i + 1] == '/') {
+					//if()
+					getResult(&error, &top, '>');
+					i++;
+				}
+				else if( str[i] == ')' || str[i] == '}' || str[i] == ']' ) {
+					getResult(&error, &top, str[i]);
+				}
+				if(error) break;
+			}
+			i++;
+		}
+		
+		readLine(str);
+		
+	}
+	
+	if(!error) {
+		if(top >= 0) {
+			printf("NO\n");
+			printChar(Stack[top]);
+			printf("-?\n");
+		}
+		else printf("YES\n");
+	}
+
+	
+	return 0;
+}
