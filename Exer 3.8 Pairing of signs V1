@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <string.h>
+#define MAX 100
+
+typedef enum{
+	left, right
+} Type;
+char Stack[MAX] = {'\0'};
+int top = -1;
+
+char getPre(char ch) {
+	if(ch == '>') return '<';
+	if(ch == ')') return '(';
+	if(ch == ']') return '[';
+	return '{';
+}
+
+Type getType(char ch) {
+	if(ch == '<' || ch == '[' || ch == '{' || ch == '(') return left;
+	return right;
+}
+
+void printChar(char ch) {
+	if(ch == '<') printf("/*");
+	else if(ch == '>') printf("*/");
+	else printf("%c", ch);
+}
+
+void readLine(char *str) {
+	
+	int i = 0;
+	while((str[i] = getchar()) != '\n') i++;
+	str[i] = '\0';
+}
+
+void getResult(int *error, int *top, char ch) {
+	if(*top == -1) {
+		
+		printf("NO\n");
+		printf("?-");
+		printChar(ch);
+		printf("\n");
+		*error = 1;
+	}
+	else if(*top >= 0) {
+		if(Stack[*top] == getPre(ch)) (*top)--;
+		else if(Stack[*top] != getPre(ch)) {
+			
+			printf("NO\n");
+			printChar(Stack[*top]);
+			printf("-?\n");
+			*error = 1;
+		}
+	}
+}
+
+
+int main() {
+	char str[MAX], signs[MAX];
+	int error = 0, pos = 0;
+	
+	readLine(str);
+	
+	while(!(strlen(str) == 1 && str[0] == '.')) {
+		//printString(str);
+		int i = 0;
+		while(str[i] != '\0') {
+			if(str[i] == '(' || str[i] == '[' || str[i] == '{') signs[pos++] = str[i];
+			
+			else if(str[i] == '/' && str[i + 1] == '*') {
+				signs[pos++] = '<';
+				i++;
+			}
+			else {
+				if(str[i] == '*' && str[i + 1] == '/') {
+					//if()
+					signs[pos++] = '>';
+					i++;
+				}
+				else if( str[i] == ')' || str[i] == '}' || str[i] == ']' ) {
+					signs[pos++] = str[i];
+				}
+			}
+			i++;
+		}
+		readLine(str);
+	}
+	
+	for(int i = 0; i < pos; i++) {
+		if( !getType(signs[i]) ) Stack[++top] = signs[i];
+		else {
+			getResult(&error, &top, signs[i]);
+			if(error) break;
+		}
+	}
+		
+	if(!error) {
+		if(top >= 0) {
+			printf("NO\n");
+			printChar(Stack[top]);
+			printf("-?\n");
+		}
+		else printf("YES\n");
+	}
+
+	return 0;
+}
