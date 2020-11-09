@@ -1,0 +1,148 @@
+#include <stdio.h>
+#include <ctype.h>
+#define MAX 20
+
+typedef enum {
+	false, true
+} bool;
+
+void printStack();
+
+typedef enum {
+	left_parentheses, right_parentheses, plus, minus, times, divide
+} Precedence;
+
+Precedence getPrecedence(char ch) {
+	switch(ch) {
+		case '(': return left_parentheses;
+		case ')': return right_parentheses;
+		case '+': return plus;
+		case '-': return minus;
+		case '*': return times;
+		case '/': return divide;
+	}
+}
+
+char Stack[MAX], answer[MAX];
+int top = -1;
+
+void readString(char *str) {
+    
+    int i = 0;
+    while((str[i] = getchar()) != '\n') i++;
+    str[i] = '\0';
+}
+
+void getNumber(char *str, int *start, char *num) {
+	
+	int i = 0;
+	//printf("asfd\n");
+	while(isdigit(str[*start]) || str[*start] == '.') {
+		//printf("str[*start] is %c\n", str[*start]);
+		num[i++] = str[(*start)++];
+	}
+	num[i] = '\0';
+	(*start)--;
+}
+
+void printOperator(char *str, int *i) {
+	
+	if(str[*i] == '(') {
+		Stack[++top] = str[*i];
+	}
+	
+	else if( str[*i] == ')') {
+		while(Stack[top] != '(') {
+			printf("%c", Stack[top--]);
+			if(str[*i + 1] != '\0' || top != -1) printf(" ");
+		}
+		top--; // delete
+	}
+	else if(str[*i] == '+' || str[*i] == '-') {
+		
+		if(!isdigit(str[*i - 1]) && !(str[*i - 1] == ')')) {
+			if(str[*i] == '-') printf("%c", str[*i]);
+		}
+		
+		else { // str[i] is an operator
+			if( top == -1 || getPrecedence(Stack[top]) < getPrecedence(str[*i]) ) {
+				Stack[++top] = str[*i];
+				//printf("I am an op\n");
+				//printStack();
+			}
+			
+			else {
+				while(top >= 0 &&getPrecedence(Stack[top]) >= getPrecedence(str[*i]) && Stack[top] != '(') {
+					printf("%c", Stack[top--]);
+					if(str[*i + 1] != '\0' || top != -1) printf(" ");
+				}
+				Stack[++top] = str[*i];
+			}
+		}
+	}
+	else if(str[*i] == '*' || str[*i] == '/') {
+		if(top == -1 || getPrecedence(Stack[top]) < getPrecedence(str[*i]) ) Stack[++top] = str[*i];
+		else while(top >= 0 &&getPrecedence(Stack[top]) >= getPrecedence(str[*i]) && Stack[top] != '(' ) {
+			printf("%c", Stack[top--]);
+			if(str[*i + 1] != '\0' || top != -1) printf(" ");
+		}
+		
+	}
+	
+}
+
+void printStack() {
+	for(int i = 0; i <= top; i++) {
+		printf("%c", Stack[top]);
+	}
+	printf("\n");
+}
+
+int main() {
+    
+    bool expr_started = false;
+    
+    
+    char str[MAX + 1];
+    readString(str);
+    
+    char num[MAX + 1];
+    
+    int i = 0;
+    while(str[i]) {
+        if(i == 0) {
+            if(str[i] == '-') {
+                printf("-");
+            }
+            else if(str[i] == '+') {
+                i++;
+            }
+            else {
+            	
+            	if(str[i] != '(') {
+	               	getNumber(str, &i, num);
+	            	printf("%s", num);
+	            	if(top != -1 || str[i + 1] != '\0') printf(" ");        		
+				}
+            	else Stack[++top] = str[i];
+			}
+        } 
+        else if(isdigit(str[i])) {
+
+			getNumber(str, &i, num);
+        	printf("%s", num);
+			if(top != -1 || str[i + 1] != '\0') printf(" ");	
+		}
+		
+		else printOperator(str, &i);
+		
+        i++;
+    }
+    
+    while(top > -1) {
+    	printf("%c", Stack[top--]);
+    	if(top != -1) printf(" ");
+	}
+    
+    return 0;
+}
