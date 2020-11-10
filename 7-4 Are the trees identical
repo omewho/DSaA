@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef enum{false, true} bool;
+typedef int ElementType;
+
+typedef struct TreeNode *PtrToTreeNode;
+struct TreeNode{
+    ElementType Data;
+    PtrToTreeNode Left, Right;
+    bool Visited;
+};
+
+int t1_seq[10], t2_seq[10];
+int u = 0, v = 0;
+
+typedef PtrToTreeNode Tree;
+
+Tree Insert(Tree T, ElementType X) {
+    Tree t = (Tree)malloc(sizeof(struct TreeNode));
+    t->Data = X;
+    t->Left = NULL;
+    t->Right = NULL;
+    t->Visited = false;
+    
+    if(!T)  T = t;
+    else if(T->Data < X) T->Right = Insert(T->Right, X);
+    else if(T->Data > X) T->Left = Insert(T->Left, X);
+    return T;
+}
+
+void preOrder(Tree T, int *t, int *uorv){
+    if(T) {
+    	//printf(" %d ", T->Data);
+    	t[(*uorv)++] = T->Data;
+    	preOrder(T->Left, t, uorv);
+    	preOrder(T->Right, t, uorv);
+	}
+}
+
+void resetSeq(int *seq, int N) {
+	for(int i = 0; i < N; i) {
+		seq[i] = 0;
+	}
+}
+
+void freeTree(Tree T) {
+	if(T->Left) freeTree(T->Left);
+	if(T->Right) freeTree(T->Right);
+	free(T);
+}
+
+
+void printSeq(int *seq, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if(i != 0) printf(" ");
+		printf("%d", seq[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+    
+    int N, L;
+    scanf("%d", &N);
+    
+    while(N) {
+		Tree T = NULL;
+        scanf("%d", &L);
+        //printf("%d L is %d\n", N, L);
+        int X;
+        for(int i = 0; i < N; i++) {
+        	scanf("%d", &X);
+        	T = Insert(T, X);
+		}
+		preOrder(T, t1_seq, &u);
+		u = 0;
+		//printf("\n");
+		//printf("asdfa is:\n");
+		//printSeq(t1_seq, N);
+		
+		
+		for(int time = 0; time < L; time++)  {
+			Tree T1 = NULL;
+			int nums[N];
+	        for(int i = 0; i < N; i++) {
+	        	scanf("%d", &nums[i]);
+			}
+			
+			for(int i = 0; i < N; i++) {
+				T1 = Insert(T1, nums[i]);
+			}
+			
+			preOrder(T1, t2_seq, &v);
+			v = 0;
+			//printf("t2_seq is:\n");
+			//printSeq(t2_seq, N);
+			
+			int isSame = 1;
+			for(int i = 0; i < N; i++) {
+				if(t1_seq[i] != t2_seq[i]) {
+					if(isSame) {
+						isSame = 0;
+						break;
+					}
+				}
+			}
+			//freeTree(T1);
+			if(isSame) printf("Yes\n");
+			else printf("No\n");
+			
+		}
+		
+        scanf("%d", &N);
+    }
+}
