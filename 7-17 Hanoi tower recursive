@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+void move(int n, char src, char aux, char dest) {
+    if(n == 1) printf("%c -> %c\n", src, dest);
+    else {
+        move(n - 1, src, dest, aux);
+        move(1, src, aux, dest);
+        move(n - 1, aux, src, dest);
+    }
+}
+
+int main() {
+    
+    int n;
+    scanf("%d", &n);
+    char src = 'a', aux = 'b', dest = 'c';
+    move(n, src, aux, dest);
+    
+    
+    return 0;
+}
