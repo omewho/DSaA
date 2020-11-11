@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <math.h>
+
+typedef enum {false, true} bool;
+
+bool isPrime(int n) {
+	
+	if(n <= 1) return false;
+	
+	if(n > 2) {
+		for(int i = 2; i * i <= n; i++) {
+			if(n % i == 0) return false;
+		}
+	}
+	
+	return true;
+}
+
+int getExp(int num, int p) {
+	int res = 0;
+	
+	while(num % p == 0) {
+		res++;
+		num /= p;
+	}
+	return res;
+}
+
+int main() {
+    
+    int n, exp, t, count = 0;
+    scanf("%d", &n);
+    
+    printf("%d=", n);
+//    for(int i = 1; i < 101; i++) {
+//    	if(isPrime(i)) printf("%d ", i);
+//	}
+//    printf("\n");
+    t = n;
+    
+    if(t == 1) printf("1");
+    
+    else if(t % 2 == 0) {
+    	//printf("hela");
+    	count++;
+    	
+        exp = getExp(t, 2);
+        printf("2");
+        if(exp != 1) printf("^%d", exp);
+        t /= (int)pow(2, exp);
+    }
+    
+    while(t != 1) {
+		
+		bool hasDivisor = 0;
+		for(int i = 3; i * i <= t; i += 2) {
+			if( t % i == 0) {
+				if(!hasDivisor) hasDivisor = 1;
+				count++;
+				if(count != 1) printf("*");
+				exp = getExp(t, i);
+				//printf("exp is %d\n", exp);
+				printf("%d", i);
+				if(exp != 1) printf("^%d", exp);
+				t = t / ((int)pow(i, exp));
+				//printf("t is now %d\n", t);
+			}	
+		}
+		
+		if(!hasDivisor) { // t is prime
+			count++;
+			if(count != 1) printf("*");
+			printf("%d", t);
+			t /= t;
+		}
+	}
+	printf("\n");
+	
+    return 0;
+}
