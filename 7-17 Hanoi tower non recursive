@@ -1,0 +1,60 @@
+#include <stdio.h>
+
+typedef struct {
+	int n;
+	char src, aux, dest;
+	
+} ElementType;
+
+ElementType Problems[100];
+int top = -1;
+
+void Hanoi(int n) {
+	
+	ElementType Prob;
+	Prob.n = n;
+	Prob.src = 'a';
+	Prob.aux = 'b';
+	Prob.dest = 'c';
+	
+	Problems[++top] = Prob;
+	
+	while(top != -1) {
+		ElementType topProb = Problems[top--], toBePushed;
+		
+		if(topProb.n == 1) printf("%c -> %c\n", topProb.src, topProb.dest);
+		else {
+			toBePushed.n = topProb.n - 1;
+			toBePushed.src = topProb.aux;
+			toBePushed.aux = topProb.src;
+			toBePushed.dest = topProb.dest;
+			
+			Problems[++top] = toBePushed;
+			
+			toBePushed.n = 1;
+			toBePushed.src = topProb.src;
+			toBePushed.aux = topProb.aux;
+			toBePushed.dest = topProb.dest;
+			
+			Problems[++top] = toBePushed;
+			
+			toBePushed.n = topProb.n - 1;
+			toBePushed.src = topProb.src;
+			toBePushed.aux = topProb.dest;
+			toBePushed.dest = topProb.aux;
+			
+			Problems[++top] = toBePushed;
+		}
+	}
+}
+
+int main() {
+    
+    int n;
+    scanf("%d", &n);
+    
+    Hanoi(n);
+    
+    
+    return 0;
+}
