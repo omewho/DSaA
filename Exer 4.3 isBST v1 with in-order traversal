@@ -1,0 +1,121 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAXSize 10
+
+typedef enum { false, true } bool;
+typedef int ElementType;
+typedef struct TNode *Position;
+typedef Position BinTree;
+struct TNode{
+    ElementType Data;
+    BinTree Left;
+    BinTree Right;
+};
+typedef struct TNode TN;
+
+BinTree Queue[MAXSize + 1];
+int front = -1, rear = -1;
+
+ElementType Seq[MAXSize + 1];
+int idx = 0;
+
+BinTree BuildTree() {
+	
+	ElementType Data;
+	scanf("%d", &Data);
+	
+	if(!Data) return NULL;
+	
+	BinTree root = (BinTree)malloc(sizeof(TN));
+	root->Data = Data;
+	root->Left = NULL;
+	root->Right = NULL;
+	
+	Queue[++rear] = root;
+	
+	
+	while(front != rear) {
+		BinTree treeNode = Queue[++front];
+		
+		scanf("%d", &Data);
+		if(Data == 0) treeNode->Left = NULL;
+		else {
+			treeNode->Left = (BinTree)malloc(sizeof(TN));
+			treeNode->Left->Data = Data;
+			treeNode->Left->Left = NULL;
+			treeNode->Left->Right = NULL;
+			
+			Queue[++rear] = treeNode->Left;
+		}
+		
+		scanf("%d", &Data);
+		if(Data == 0) treeNode->Right = NULL;
+		else {
+			treeNode->Right = (BinTree)malloc(sizeof(TN));
+			treeNode->Right->Data = Data;
+			treeNode->Right->Left = NULL;
+			treeNode->Right->Right = NULL;
+			
+			Queue[++rear] = treeNode->Right;
+		}
+	}
+	
+	return root;
+}
+
+void preOrder(BinTree bt) {
+	if(bt) {
+		printf("%d ", bt->Data);
+		preOrder(bt->Left);
+		preOrder(bt->Right);
+	}
+}
+
+void inOrder(BinTree bt) {
+	if(bt) {
+		inOrder(bt->Left);
+		Seq[idx++] = bt->Data;
+		inOrder(bt->Right);
+	}
+}
+
+void printSeq() {
+	for(int i = 0; i < idx; i++) {
+		if(i != 0) printf(" ");
+		printf("%d", Seq[i]);
+	}
+	printf("\n");
+}
+/* 由裁判实现，细节不表 */
+bool IsBST ( BinTree T );
+
+int main() {
+    BinTree T;
+
+    T = BuildTree(); //Sample one: 4 3 5 1 0 0 7 0 2 6 8 0 0 0 0 0 0
+                     //Sample two: 4 5 3 1 0 6 7 0 0 0 0 0 0
+    
+    preOrder(T);
+    printf("\n");
+    
+    inOrder(T);
+    printf("\n");
+    
+    printf("idx = %d\n", idx);
+    printSeq();
+    printf("\n");
+    
+    if ( IsBST(T) ) printf("Yes\n");
+    else printf("No\n");
+
+    return 0;
+}
+
+bool IsBST ( BinTree T ){
+	
+	for(int i = 0; i < idx - 1; i++) {
+		if(Seq[i + 1] < Seq[i]) return false;
+	}
+	
+	return true;
+}
