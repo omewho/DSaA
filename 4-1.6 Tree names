@@ -1,0 +1,10 @@
+n = int(input())
+
+treedict = {}
+
+for i in range(n):
+    treename = input()
+    treedict[treename] = treedict.get(treename, 0) + 1
+
+for tree in sorted(treedict):
+    print(tree, "%.4f%%"%(treedict[tree] / n * 100))
