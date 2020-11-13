@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX 30
+
+typedef struct TreeNode *PtrToTreeNode;
+typedef PtrToTreeNode Tree;
+struct TreeNode{
+	char name[31];
+	Tree Left, Right;
+	int num;
+};
+
+void readName(char *name) {
+	
+	int i = 0;
+	while( (name[i] = getchar()) != '\n') i++;
+	name[i] = '\0';
+}
+
+Tree insert(Tree T, char *name) {
+	
+	if(!T) {
+		Tree root = (Tree)malloc(sizeof(struct TreeNode));
+		strcpy(root->name, name);
+		root->Left = NULL;
+		root->Right = NULL;
+		root->num = 1;
+		
+		return root;
+	}
+	
+	else {
+		if(strcmp(T->name, name) > 0) T->Left = insert(T->Left, name);
+		else if(!strcmp(T->name, name)) (T->num)++;
+		else T->Right = insert(T->Right, name);
+	}
+	return T;
+}
+
+Tree buildTree(int *n) {
+	
+	scanf("%d\n", &(*n));
+	
+	char name[MAX + 1];
+	
+	Tree T = NULL;
+	//getchar();
+	for(int i = 0; i < *n; i++) {
+		
+		readName(name);
+		//printf("%s\n", name);
+		T = insert(T, name);
+	}
+	
+	return T;
+}
+
+void inOrder(Tree T, int n) {
+	
+	if(T) {
+		inOrder(T->Left, n);
+		printf("%s %.4f%%\n", T->name, T->num * 1.0 / n * 100);
+		inOrder(T->Right, n);
+	}
+}
+
+int main() {
+	
+	int n;
+	Tree T = buildTree(&n);
+	
+	inOrder(T, n);
+	
+	
+	return 0;
+}
