@@ -1,0 +1,119 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+
+typedef struct AVLTreeNode *PtrToAVLTreeNode;
+typedef PtrToAVLTreeNode AVLTree;
+struct AVLTreeNode{
+	ElementType Data;
+	AVLTree Left, Right;
+	int Height;
+};
+
+int getMax(int a, int b) {
+	return a > b? a : b;
+}
+
+int getHeight(AVLTree avl) {
+	if(avl) return avl->Height;
+	else return 0;
+}
+
+AVLTree llrotation(AVLTree avl) {
+	
+	AVLTree b = avl->Left;
+	avl->Left = b->Right;
+	b->Right = avl;
+	
+	avl->Height = getMax( getHeight(avl->Left), getHeight(avl->Right) ) + 1;
+	b->Height = getMax( getHeight(b->Left), avl->Height ) + 1;
+	return b;
+}
+
+AVLTree rrrotation(AVLTree avl) {
+	
+	AVLTree b = avl->Right;
+	avl->Right = b->Left;
+	b->Left = avl;
+	
+	avl->Height = getMax( getHeight(avl->Left), getHeight(avl->Right) ) + 1;
+	b->Height = getMax( avl->Height, getHeight(b->Right) ) + 1;
+	
+	return b;
+}
+
+AVLTree lrrotation(AVLTree avl) {
+	
+	avl->Left = rrrotation(avl->Left);
+	return llrotation(avl);
+}
+
+AVLTree rlrotation(AVLTree avl) {
+	
+	avl->Right = llrotation(avl->Right);
+	return rrrotation(avl);
+}
+
+
+AVLTree insert(AVLTree avl, ElementType X) {
+	if(!avl) {
+		AVLTree avlnode = (AVLTree)malloc(sizeof(struct AVLTreeNode));
+		avlnode->Data = X;
+		avlnode->Height = 1;//if Height of NULL is -1, set this as 0; if height of NULL is 0, set this as 1;
+		avlnode->Left= NULL;
+		avlnode->Right = NULL;
+		
+		return avlnode;
+	}
+	
+	else if(X < avl->Data) {
+		avl->Left = insert(avl->Left, X);
+		
+		if(getHeight(avl->Left) - getHeight(avl->Right) == 2) {
+			if( X < avl->Left->Data) avl = llrotation(avl);
+			else avl = lrrotation(avl);  // X > avl->Left->Data
+		}
+	}
+	
+	else if(X > avl->Data){
+		avl->Right = insert(avl->Right, X);
+		
+		if(getHeight(avl->Right) - getHeight(avl->Left) == 2) {
+			if( X < avl->Right->Data) avl = rlrotation(avl);
+			else avl = rrrotation(avl);
+		}
+	}
+	
+	avl->Height = getMax(getHeight(avl->Left), getHeight(avl->Right)) + 1;
+	return avl;
+}
+
+void preOrder(AVLTree avl) {
+	if(avl) {
+		printf("%d ", avl->Data);
+		preOrder(avl->Left);
+		preOrder(avl->Right);
+	}
+}
+
+int main() {
+	
+	int n;
+	scanf("%d", &n);
+	
+	ElementType X;
+	AVLTree avl = NULL;
+	
+	for(int i = 0; i < n; i++) {
+		
+		scanf("%d", &X);
+		avl = insert(avl, X);
+	}
+	
+	printf("%d\n", avl->Data);
+	
+	//preOrder(avl);
+	
+	return 0;
+}
