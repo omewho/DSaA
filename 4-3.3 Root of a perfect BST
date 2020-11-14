@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 1000
+
+typedef int ElementType;
+
+int pos = 0;
+
+int cmp(const void*a, const void *b) {
+	return *((int *)a) - *((int *)b);
+}
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if(i != 0) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int getPower(int n) {
+	
+	int res = 1;
+	for(int i = 1; i <= n; i++) {
+		res *= 2;
+	}
+	return res;
+}
+
+int getLevelNum(int n) {
+	
+	int res = 1;
+	while(getPower(res) <= n + 1) res++;
+	res--;
+	
+	return res;
+}
+
+void buildTree(int *arr, int start, int end, int *ans, int root) {
+	
+	if(start > end) return;
+	
+	int ttlofNodes = end - start + 1, x, level, lastLvlNum, lastLvlLeftNum, leftNum;
+	
+	level = getLevelNum(ttlofNodes);
+	x = ttlofNodes - getPower(level) + 1;
+	lastLvlNum = getPower(level - 1);  // lastLvlNum is the same as the largest possible number  
+	                                   //of nodes on the last level of the left subtree.
+	lastLvlLeftNum = x;
+	if(x > lastLvlNum) lastLvlLeftNum = lastLvlNum;
+	
+	leftNum = getPower(level - 1) - 1 + lastLvlLeftNum;
+	
+//	printf("level is %d, x is %d, lastLvlNum is %d, leftNum = %d\n", level, x, lastLvlNum, leftNum);
+	
+	ans[root] = arr[start + leftNum];
+	
+	int leftChild = 2 * root + 1, rightChild = 2 * root + 2;
+	
+	buildTree(arr, start, start + leftNum - 1, ans, leftChild);
+	buildTree(arr, start + leftNum + 1, end, ans, rightChild);
+	
+}
+
+int main() {
+	
+	int n;
+	scanf("%d", &n);
+	
+	ElementType nums[n], answer[n];
+	for(int i = 0; i < n; i++) {
+		
+		scanf("%d", &nums[i]);
+	}
+	
+	qsort(nums, n, sizeof(int), cmp);
+//	printArr(nums, n);
+//	
+//	printf("%d\n", getLevelNum(3));
+	
+	buildTree(nums, 0, n - 1, answer, 0);
+	
+	for(int i = 0; i < n; i++) {
+		if(i != 0) printf(" ");
+		printf("%d", answer[i]);
+	}
+	printf("\n");
+	return 0;
+}
