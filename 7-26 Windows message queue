@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <string.h>
+#define MAXN 100000
+#define MAXL 10
+#define MINDATA {-1, 0}
+
+char messages[MAXN][MAXL + 1];
+int msg_idx = 0;
+
+
+struct MSG {
+	int idx;
+	int priority;
+};
+
+typedef struct MSG ElementType;
+
+ElementType Heap[MAXN] = {MINDATA};
+int Size = 0;
+
+void insert(ElementType X) {
+	
+	int idx = ++Size;
+	while(Heap[idx / 2].priority > X.priority)  {
+		
+		Heap[idx] = Heap[idx / 2];
+		idx /= 2;
+	}
+	Heap[idx] = X;
+}
+
+ElementType del() {
+	
+	ElementType Min = Heap[1], last;
+	
+	last = Heap[Size--];
+	
+	int parent = 1;
+	
+	while( 2 * parent <= Size ) {
+		int child = 2 * parent;
+		if(child != Size && Heap[child].priority > Heap[child + 1].priority) child++;
+		
+		if(last.priority < Heap[child].priority) break;
+		else Heap[parent] = Heap[child];
+		
+		parent = child;
+	}
+	Heap[parent] = last;
+	
+	return Min;
+}
+
+int main() {	
+	
+	int n;
+	scanf("%d", &n);
+	
+	char op[4], msg[MAXL + 1];
+	int priority;
+	ElementType X;
+	
+	for(int i = 0; i < n; i++) {
+		
+		scanf("%s", op);
+		switch(op[0]) {
+			case 'P':
+				
+				scanf("%s", &messages[msg_idx][0]);
+				//strcpy(messages[msg_idx], msg);
+				//printf("%s\n", messages[msg_idx]);
+				scanf("%d", &priority);
+				
+				X.idx = msg_idx++;
+				X.priority = priority;
+				insert(X);
+				break;
+			case 'G':
+				if(!Size) printf("EMPTY QUEUE!\n");
+				else printf("%s\n", messages[del().idx]);
+			
+		}
+	}
+	
+	
+	return 0;
+}
