@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100000
+#define MAXL 10
+
+char messages[MAX][MAXL + 1];
+int msg_idx = 0;
+
+typedef int Priority;
+
+struct MSG {
+	int idx;
+	Priority p;
+};
+
+typedef struct MSG ElementType;
+
+typedef struct HeapNode * PtrToHNode;
+struct HeapNode {
+	ElementType *Data;
+	int Capacity;
+	int Size;
+};
+
+typedef PtrToHNode MinHeap;
+
+MinHeap createHeap(int n) {
+	MinHeap h = (MinHeap)malloc(sizeof(struct HeapNode));
+	h->Data = (ElementType *)malloc((n + 1) * sizeof(ElementType));
+	h->Capacity = n;
+	h->Size = 0;
+	ElementType Min;
+	Min.idx = -1;
+	Min.p = 0;
+	h->Data[0] = Min;
+	
+	return h;
+}
+
+void insert(MinHeap mh, ElementType X) {
+	
+	int i = ++(mh->Size);
+	while(mh->Data[i / 2].p > X.p ) {
+		mh->Data[i] = mh->Data[i / 2];
+		i /= 2;
+	}
+	mh->Data[i] = X;	
+}
+
+void printHeap(MinHeap mh) {
+	
+	for(int i = 1; i <= mh->Size; i++) {
+		printf("%d: %s\n", i, messages[mh->Data[i].idx]);
+	}
+}
+
+ElementType del(MinHeap mh) {
+	
+	ElementType Minimum = mh->Data[1], last = mh->Data[(mh->Size)--];
+	int parent = 1;
+	while( 2 * parent <= mh->Size) {
+		int child = 2 * parent;
+		if(child != mh->Size && mh->Data[child].p > mh->Data[child + 1].p) child++;
+		
+		if(mh->Data[child].p >= last.p) break;
+		else mh->Data[parent] = mh->Data[child];
+		
+		parent = child;
+	}
+	mh->Data[parent] = last;
+	return Minimum;
+}
+
+int main() {
+    
+    int n;
+    scanf("%d", &n);
+    
+    MinHeap mh = createHeap(n);
+    //printf("%d %d\n", mh->Data[0].idx, mh->Data[0].p);
+    
+    char op[4], msg[MAXL + 1];
+    Priority p;
+    ElementType X;
+    for(int i = 0; i < n; i++) {
+		
+		scanf("%s", op);
+		//printf("%s\n", op);
+		switch(op[0]) {
+			case 'P':
+				scanf("%s", &messages[msg_idx][0]);
+				//printf("msg is %s\n", msg);
+				scanf("%d", &p);
+				//printf("p is %d\n", p);
+				X.idx = msg_idx;
+				X.p = p;
+				insert(mh, X);
+				msg_idx++;
+				break;
+			case 'G':
+				if(!(mh->Size)) printf("EMPTY QUEUE!\n");
+				else printf("%s\n", messages[del(mh).idx]);
+				
+				break;
+				
+		}
+	} 
+    
+    return 0;
+}
