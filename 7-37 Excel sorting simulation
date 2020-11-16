@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX 8
+
+struct studentInfo{
+	int ID;
+	char Name[MAX + 1];
+	int Score;
+};
+typedef struct studentInfo Stu;
+
+int compID(const void *a, const void *b) {
+	
+	return ((Stu *)a)->ID - ((Stu *)b)->ID;
+}
+
+int compName(const void *a, const void *b) {
+	
+	int nameK = strcmp( (*(Stu *)a).Name, (*(Stu *)b).Name );
+	
+	if(!nameK) return compID(a, b);
+	else return strcmp( (*(Stu *)a).Name, (*(Stu *)b).Name );
+}
+
+int compScore( const void *a, const void *b ) {
+	
+	int scoreK = (*(Stu *)a).Score - (*(Stu *)b).Score;
+	
+	if(!scoreK) return compID(a, b);
+	return scoreK;	
+}
+
+void printRecords(Stu *s, int n) {
+	for(int i = 0; i < n; i++) {
+		printf("%06d %s %d\n", s[i].ID, s[i].Name, s[i].Score);
+	}
+}
+
+
+int main() {
+    
+    int n, c;
+    scanf("%d %d", &n, &c);
+    //printf("%d %d\n", n, c);
+    
+    Stu stds[n];
+    int sco;
+    
+    for(int i = 0; i < n; i++) {
+    	
+    	scanf("%d", &stds[i].ID);
+    	//printf("id is %d\n", stds[i].ID);
+    	
+    	scanf("%s", &stds[i].Name);
+    	//printf("Name is %s\n", stds[i].Name);
+    	
+    	scanf("%d", &stds[i].Score);
+    	//printf("Score is %d\n", stds[i].Score);
+    	//printf("%06d %s %d\n", stds[i].ID, stds[i].Name, stds[i].Score);	
+
+	}
+	
+	switch(c) {
+    	case 1:
+    		qsort(stds, n, sizeof(Stu), compID);
+    		break;
+    	case 2:
+    		qsort(stds, n, sizeof(Stu), compName);
+    		break;
+    	case 3:
+    		qsort(stds, n, sizeof(Stu), compScore);
+    		break;		
+	}
+	//printf("\n");
+    printRecords(stds, n);
+    
+    return 0;
+}
