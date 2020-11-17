@@ -1,0 +1,58 @@
+#include <stdio.h>
+
+void readNums(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		
+		scanf("%d", &arr[i]);
+	}
+}
+
+void findNCA(int *arr, int a, int b) {
+	
+	int res = -1, null = 0, nullnode = b;
+	
+	
+	if( !arr[a - 1] || !arr[b - 1]) {
+		
+		null = 1;
+		if( !arr[a - 1] ) nullnode = a;
+		
+	}
+	
+	if(null) printf("ERROR: T[%d] is NULL\n", nullnode);
+	
+	else {
+		
+		while (a != b) {
+			if ( a > b ) {
+				int temp = a;
+				a = b; 
+				b = temp;
+			}
+			
+			b /= 2;
+		}
+		
+		printf("%d %d\n", a, arr[a - 1]);
+	}
+	
+}
+
+int main() {
+	
+	int n;
+	scanf("%d", &n);
+	
+	int nums[n];
+	readNums(nums, n);
+	
+	int a, b;
+	scanf("%d %d", &a, &b);
+	
+	findNCA(nums, a, b);
+	
+	
+	
+	return 0;
+}
