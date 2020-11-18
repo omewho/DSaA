@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int comp(const void*a, const void*b) {
+    
+    return (*(int *)a) - (*(int *)b);
+}
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if( i != 0) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+    
+    int n, m;
+    scanf("%d", &n);
+    
+    int prices[n];
+    for(int i = 0; i < n; i++) {
+        
+        scanf("%d", &prices[i]);
+    }
+    
+    scanf("%d", &m);
+    int values[m];
+    
+    for(int i = 0; i < m; i++) {
+        
+        scanf("%d", &values[i]);
+    }
+    
+    qsort(prices, n, sizeof(int), comp);
+    qsort(values, m, sizeof(int), comp);
+    
+//    printArr(prices, n);
+//    printArr(values, m);
+    
+    int pp = 0, qp = n - 1, pv = 0, qv = m - 1;
+    
+    int sum = 0;
+    while(pp < n && pv < m && prices[pp] < 0 && values[pv] < 0) {
+    	sum += prices[pp] * values[pv];
+    	pp++;
+    	pv++;
+	}
+	
+	while( qp >= 0 && qv >= 0 && prices[qp] >0 && values[qv] > 0) {
+		sum += prices[qp] * values[qv];
+		qp--;
+		qv--;
+	}
+    
+    printf("%d\n", sum);
+    
+    
+    return 0;
+}
