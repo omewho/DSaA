@@ -1,0 +1,44 @@
+#include <cstdio>
+#include <map>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+map<int, vector<string>> mp;
+vector<string>::iterator it;
+
+int main() {
+    
+    int n, k;
+    scanf("%d %d", &n, &k);
+    
+    char name[5];
+    int c, id;
+    for(int i = 0; i < n; i++) {
+    	
+    	scanf("%s", name);
+    	//printf("%s\n", name);
+    	scanf("%d", &c);
+    	
+    	for(int j = 0; j < c; j++) {
+    		
+    		scanf("%d", &id);
+    		mp[id].push_back(name);
+    		//printf("%s %d\n", name, id);
+		}
+    	
+    	
+	}
+	
+	for(int i = 1; i <= k; i++) {
+		printf("%d %d\n", i, mp[i].size());
+		sort(mp[i].begin(), mp[i].end());
+		for(it = mp[i].begin(); it != mp[i].end(); it++) {
+			
+			printf("%s\n", (*it).c_str());
+		}
+	}
+    
+    
+    return 0;
+}
