@@ -1,0 +1,50 @@
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <map>
+#include <vector>
+using namespace std;
+//typedef char name[5] Name;
+struct ptrCmp {
+    bool operator()( const char * s1, const char * s2 ) const {
+        return strcmp( s1, s2 ) < 0;
+    }
+};
+
+map<string, vector<int>> mp;
+vector<int>::iterator it;
+
+
+int main() {
+    int n, k;
+    scanf("%d %d", &n, &k);
+    //printf("%d %d\n", n, k);
+    
+	char name[5];
+    int id, num;
+    for(int i = 0; i < k; i++) {
+    	
+    	scanf("%d %d\n", &id, &num);
+    	//printf("%d %d\n", id, num);
+    	for(int j = 0; j < num; j++) {
+    		scanf("%s", name);
+    		//getchar();
+    		//printf("%s\n", name);
+    		mp[name].push_back(id);
+		}
+	}
+    
+    for(int i = 0; i < n; i++) {
+    	scanf("%s", name);
+    	printf("%s %d", name, mp[name].size());
+    	
+    	sort(mp[name].begin(), mp[name].end());
+    	for(it = mp[name].begin(); it != mp[name].end(); it++) {
+    		printf(" %d", *it);
+    		
+		}
+		printf("\n");
+	}
+
+    return 0;
+}
