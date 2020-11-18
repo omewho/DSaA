@@ -1,0 +1,57 @@
+#include <cstdio>
+#include <algorithm> 
+#include <vector>
+#include <string.h>
+
+using namespace std;
+
+typedef struct billionaire {
+	char name[9];
+	int age;
+	int worth;
+} Blnr;
+
+bool comp(Blnr a, Blnr b) {
+	if(a.age == b.age && a.worth == b.worth) return strcmp(b.name, a.name) > 0;
+	else if(a.worth == b.worth) return a.age < b.age;
+	else return a.worth > b.worth;
+}
+
+int main() {
+	
+	int n, k;
+	scanf("%d %d\n", &n, &k);
+	
+	Blnr blnrs[n];
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%s%d%d", blnrs[i].name, &blnrs[i].age, &blnrs[i].worth);
+		//scanf("%d %d", &blnrs[i].age, &blnrs[i].worth);
+		//getchar();
+		//printf("%s %d %d\n", blnrs[i].name, blnrs[i].age, blnrs[i].worth);
+	}
+	
+	sort(blnrs, blnrs + n, comp);
+	
+	for(int i = 0; i < k; i++) {
+		int m, min, max;
+		scanf("%d %d %d", &m, &min, &max);
+		//printf("%d %d %d\n", m, min, max);
+		
+		printf("Case #%d:\n", i + 1);
+		
+		int count = 0;
+		for(int j = 0; j < n; j++) {
+			if(blnrs[j].age >= min && blnrs[j].age <= max) {
+				//printf("blnrs[%d].name is %s, his/her age is %d, between %d and %d\n", j, blnrs[j].name, blnrs[j].age, min, max);
+				printf("%s %d %d\n", blnrs[j].name, blnrs[j].age, blnrs[j].worth);
+				count++;
+				if(count == m) break;
+			}
+		}
+		
+		if( !count ) printf("None\n");
+		
+	}
+	
+}
