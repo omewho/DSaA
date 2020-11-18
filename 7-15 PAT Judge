@@ -1,0 +1,109 @@
+#include<iostream>
+#include<algorithm>
+#define MAXK 5
+
+using namespace std;
+
+typedef struct usr{
+    int id;
+    int scores[MAXK] = {-2, -2, -2, -2, -2};
+    int total;
+    int rank;
+    int solved = 0;
+    int passed = 0;
+}User;
+
+bool comp(User ua, User ub) {
+	
+	if(ua.total == ub.total) {
+		if(ua.solved == ub.solved) return ua.id < ub.id;
+		else return ua.solved > ub.solved;
+	}
+	else return ua.total > ub.total;
+}
+
+void printArr(User *usr, int n, int pnum) {
+	
+	for(int i = 0; i < n; i++) {
+		
+		printf("%d %05d %d", usr[i].rank, usr[i].id, usr[i].total);
+		for(int j = 0; j < pnum; j++) {
+			
+			if(usr[i].scores[j] >= 0 ) printf(" %d", usr[i].scores[j]);
+			else if(usr[i].scores[j] == -1 ) printf(" 0");
+			else printf(" -"); 
+		}
+		printf("\n");
+	}
+}
+
+int main(){
+	
+	int n, k, m;
+	scanf("%d%d%d", &n, &k, &m);
+	//printf("%d %d %d\n", n, k, m);
+	
+	User u[n + 1], passed[n + 1];
+	int pst = 0;
+	
+	int fullmarks[k];
+	for(int i = 0; i < k; i++) {
+		scanf("%d", &fullmarks[i]);
+	}
+	
+//	for(int i = 0; i < k; i++) {
+//		if(i) printf(" ");
+//		printf("%d", fullmarks[i]);
+//	}
+//	printf("\n");
+	
+	
+	int id, pid, score;
+	for(int i = 0; i < m; i++) {
+		scanf("%d%d%d", &id, &pid, &score);
+		u[id].id = id;
+		if(score > u[id].scores[pid - 1]) u[id].scores[pid - 1] = score;
+		
+		//if(score == fullmarks[pid - 1]) u[id].solved++;
+	//	printf("%05d %d %d\n", id, pid, score);
+	}
+	
+	for(int i = 1; i <= n; i++) {
+		
+		u[i].total = 0;
+		int passed_flag = 0;
+		for(int j = 0; j < k; j++) {
+			if(u[i].scores[j] >= 0) {
+				u[i].total += u[i].scores[j];
+				if(!passed_flag) passed_flag = 1;
+				if(u[i].scores[j] == fullmarks[j]) u[i].solved++;
+			}
+			
+		}
+		if(passed_flag) passed[pst++] = u[i];
+		
+		
+//		printf("%05d %d", i, u[i].total);
+//		for(int j = 0; j < k; j++) {
+//			
+//			if(u[i].scores[j] >= 0 ) printf(" %d", u[i].scores[j]);
+//			else if(u[i].scores[j] == -1) printf(" 0");
+//			else printf(" -"); 
+//		}
+//		printf("\n");
+	}
+	
+	//printArr(passed, pst, k);
+	
+	sort(passed, passed + pst, comp);
+	
+	for(int i = 0; i < pst; i++) {
+		
+		passed[i].rank = i + 1;
+		if(i != 0 && passed[i].total == passed[i - 1].total) passed[i].rank = passed[i - 1].rank;
+		
+	}
+	printArr(passed, pst, k);
+    
+    return 0;
+}
