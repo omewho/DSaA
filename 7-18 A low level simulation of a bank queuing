@@ -1,0 +1,43 @@
+#include <stdio.h>
+#define MAX 1000
+
+int QueueA[MAX], QueueB[MAX], Queue[MAX];
+
+int frontA = 0, rearA = 0;
+int frontB = 0, rearB = 0;
+
+
+int main(){
+	
+	int n, num;
+	scanf("%d", &n);
+	int rear = 0;
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &num);
+		if(num % 2 == 1) QueueA[rearA++] = num;
+		else QueueB[rearB++] = num;	
+	}
+	
+	while(frontA != rearA && frontB != rearB) {
+		Queue[rear++] = QueueA[frontA++];
+		if(frontA != rearA) Queue[rear++] = QueueA[frontA++];
+		Queue[rear++] = QueueB[frontB++];
+	}
+	
+	while(frontA != rearA) {
+		Queue[rear++] = QueueA[frontA++];
+	}
+	
+	while(frontB != rearB) {
+		Queue[rear++] = QueueB[frontB++];
+	}
+	
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", Queue[i]);
+	}
+	printf("\n");
+    
+    return 0;
+}
