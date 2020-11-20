@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+typedef int SetName;
+
+typedef ElementType * SetType;
+SetType init(int n) {
+	
+	SetType s = (SetType)malloc(n * sizeof(ElementType));
+	
+	int i;
+	for(i = 0; i < n; i++) {
+		s[i] = -1;
+	}
+	return s;
+}
+
+void printArr(int *arr, int n) {
+	for(int i = 0; i < n; i++) {
+		if(i != 0) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+SetName Find(SetType S, ElementType X) {
+	if(S[X] < 0) return X;
+	return S[X] = Find(S, S[X]);
+}
+
+void Union(SetType S, SetName sn1, SetName sn2) {
+	
+	if(S[sn1] < S[sn2]) {
+		S[sn1] += S[sn2];
+		S[sn2] = sn1;
+	}
+	else {
+		S[sn2] += S[sn1];
+		S[sn1] = sn2;
+	}
+	//printf("Now sn1 is %d\n");
+}
+
+int FindMax(SetType S, int Size) {
+	
+	int m = -1;
+	for(int i = 0; i < Size; i++) {
+		if(S[i] < m) m = S[i];
+	}
+	return -m;
+}
+
+int main() {
+	
+	int n, m;
+	scanf("%d%d\n", &n, &m);
+	
+	SetType s = init(n);
+	//printArr(s, n);
+	
+	int mi;
+	ElementType id1, id;
+	 
+	for(int i = 0; i < m; i++) {
+		scanf("%d%d", &mi, &id1);
+		//printf("%d %d\n", mi, id1);
+		
+		SetName sn1 = Find(s, id1 - 1);
+		//printf("sn1 is %d\n", sn1);
+		for(int j = 1; j < mi; j++) {
+			scanf("%d", &id);
+			//printf("id is %d\n", id);
+			if ( j ) {
+				SetName sn2 = Find(s, id - 1);
+				//printf("sn2 is %d\n", sn2);
+				if(sn2 != sn1) {
+					
+					Union(s, sn1, sn2);
+					sn1 = Find(s, sn1);
+					sn2 = Find(s, sn2);
+					//printf("Now, sn1 belongs to %d, sn2 belongs to %d\n", sn1, sn2);
+				}
+			}
+		}
+	}
+	printf("%d\n", FindMax(s, n));
+	
+	 
+	return 0;
+}
