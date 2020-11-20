@@ -1,0 +1,103 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef int ElementType;
+typedef int SetName;
+
+typedef ElementType * SetType;
+SetType init(int n) {
+	
+	SetType s = (SetType)malloc(n * sizeof(ElementType));
+	
+	int i;
+	for(i = 0; i < n; i++) {
+		s[i] = -1;
+	}
+	return s;
+}
+
+void printArr(int *arr, int n) {
+	for(int i = 0; i < n; i++) {
+		if(i != 0) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+SetName Find(SetType S, ElementType X) {
+	if(S[X] < 0) return X;
+	return S[X] = Find(S, S[X]);
+}
+
+void check_connection(SetType S) {
+	
+	ElementType x1, x2;
+	scanf("%d %d\n", &x1, &x2);
+	SetName sn1 = Find(S, x1 - 1), sn2 = Find(S, x2 - 1);
+	
+	if(sn1 == sn2) printf("yes\n");
+	else printf("no\n");
+	
+}
+
+void Union(SetType S, SetName sn1, SetName sn2) {
+	
+	if(S[sn1] < S[sn2]) {
+		S[sn1] += S[sn2];
+		S[sn2] = sn1;
+	}
+	else {
+		S[sn2] += S[sn1];
+		S[sn1] = sn2;
+	}
+}
+
+void input_connection(SetType S) {
+	
+	ElementType x1, x2;
+	scanf("%d %d\n", &x1, &x2);
+	SetName sn1 = Find(S, x1 - 1), sn2 = Find(S, x2 - 1);
+	if(sn1 != sn2) Union(S, sn1, sn2);
+}
+
+void check_network(SetType S, int n) {
+	
+	int count = 0;
+	for(int i = 0; i < n; i++) {
+		if(S[i] < 0) count++;
+	}
+	if(count > 1) printf("There are %d components.\n");
+	else printf("The network is connected.\n");
+}
+
+int main() {
+	
+	int n;
+	scanf("%d\n", &n);
+	
+	SetType s = init(n);
+	//printArr(s, n);
+	
+	char op;
+	int c1, c2;
+	
+	scanf("%c", &op);
+	
+	while(op != 'S'){
+		switch(op) {
+			case 'C':
+				check_connection(s);
+				break;
+			case 'I':
+				input_connection(s);
+				break;	
+		}
+		
+		//getchar();
+		scanf("%c", &op);
+		//printf("op is now %c\n", op);
+	}
+	check_network(s, n);
+	 
+	return 0;
+}
