@@ -1,0 +1,149 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+/*  definition of Huffman tree  */
+typedef int WeightType;
+typedef struct HMTNode * HMTree;
+struct HMTNode {
+	WeightType Length;
+	HMTree Left, Right;
+};
+
+/*       */
+
+
+/*  definition of minheap   */
+typedef HMTree MHElementType;
+typedef struct HeapNode *Heap;
+struct HeapNode {
+	MHElementType *Data;
+	int Capacity;
+	int Size;
+};
+
+typedef Heap MinHeap;
+/*                    */
+
+void percolateUp(int pos, MinHeap mh) {
+	MHElementType X = mh->Data[pos];
+	while(mh->Data[pos / 2]->Length > X->Length) {
+		
+		mh->Data[pos] = mh->Data[pos / 2];
+		pos /= 2;
+	}
+	
+	mh->Data[pos] = X;
+}
+
+void insert(MinHeap mh, MHElementType X) {
+	
+	mh->Data[++mh->Size] = X;
+	int pos = mh->Size;
+	percolateUp(pos, mh);
+}
+
+MinHeap initializeMinHeap(int Capacity) {
+	
+	MinHeap mh = (MinHeap)malloc(sizeof(struct HeapNode));
+	mh->Data = (MHElementType *)malloc((Capacity + 1) * sizeof(HMTree));
+	mh->Capacity = Capacity;
+	mh->Size = 0;
+	
+	HMTree minhmtree = (HMTree)malloc(sizeof(struct HMTNode));
+	minhmtree->Length = 0;
+	minhmtree->Left = minhmtree->Right = NULL;
+	
+	mh->Data[0] = minhmtree;
+	return mh;
+}
+
+void percolateDown(int pos, MinHeap mh) {
+	
+	MHElementType X = mh->Data[pos];
+	int parent = pos;
+	while( 2 * parent <= mh->Size) {
+		int child = 2 * parent;
+		if( child != mh->Size && mh->Data[child]->Length > mh->Data[child + 1]->Length) child++;
+		
+		if( mh->Data[child]->Length >= X->Length ) break;
+		else mh->Data[parent] = mh->Data[child];
+		parent = child;
+	}
+	mh->Data[parent] = X;
+}
+
+HMTree deleteMin(MinHeap mh) {
+	
+	HMTree hmtree = mh->Data[1];
+	mh->Data[1] = mh->Data[mh->Size--];
+	percolateDown(1, mh);
+	
+	return hmtree;
+}
+
+void printHeap(MinHeap mh) {
+	for(int i = 1; i <= mh->Size; i++) {
+		if(i != 1) printf(" ");
+		printf("%d", mh->Data[i]->Length);
+	}
+	printf("\n");
+}
+
+void buildHeap(MinHeap mh, WeightType *data) {
+	
+	int n = mh->Capacity;
+	for(int i = 1; i <= n; i++) {
+		HMTree hmtree = (HMTree)malloc(sizeof(struct HMTNode));
+		hmtree->Left = hmtree->Right = NULL;
+		hmtree->Length = data[i - 1];
+		
+		mh->Data[i] = hmtree;
+	}
+	mh->Size = mh->Capacity;
+	
+	for(int i = mh->Size / 2; i > 0; i--) percolateDown(i, mh);
+
+}
+
+HMTree buildHMTree(MinHeap mh) {
+	
+	//int N = mh->Size;
+	HMTree hmtree;
+	while(mh->Size > 1) {
+		hmtree = (HMTree)malloc(sizeof(struct HMTNode));
+		hmtree->Left = deleteMin(mh);
+		hmtree->Right = deleteMin(mh);
+		hmtree->Length = hmtree->Left->Length + hmtree->Right->Length;
+		insert(mh, hmtree);
+	}
+	
+	return deleteMin(mh);
+}
+
+int calculateCost(HMTree hmtree, int depth) {
+	if(!hmtree->Left && !hmtree->Right) return depth * hmtree->Length;
+	return calculateCost(hmtree->Left, depth + 1) + calculateCost(hmtree->Right, depth + 1);
+}
+
+int main() {
+	
+	int n;
+	scanf("%d", &n);
+	
+	MinHeap mh = initializeMinHeap(n);
+	
+	WeightType lens[n];
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &lens[i]);
+	}
+	
+	buildHeap(mh, lens);
+	//printf("size is %d\n", mh->Size);
+	//printHeap(mh);
+	
+	HMTree hmtree = buildHMTree(mh);
+	printf("%d\n", calculateCost(hmtree, 0));
+	
+	
+	return 0;
+}
