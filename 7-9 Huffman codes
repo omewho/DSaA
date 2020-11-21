@@ -1,0 +1,287 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MINDATA 0
+
+typedef char * STR;
+/*---------beginning of definition of Huffman Tree---------*/
+typedef int WeightType;
+typedef struct HMNode *HMTree;
+struct HMNode {
+	WeightType Weight;
+	HMTree Left, Right;
+};
+
+/*---------end of definition of Huffman Tree---------*/
+
+/*---------beginning of definition of Minimum Heap---------*/
+
+typedef HMTree MinHElementType;
+
+typedef struct HeapNode * Heap;
+struct HeapNode {
+	MinHElementType *Data;
+	int Capacity;
+	int Size;
+};
+
+typedef Heap MinHeap;
+
+/*---------end of definition of Huffman Tree---------*/
+
+
+MinHeap initializeMinHeap(int Capacity) {
+	MinHeap mh = (MinHeap)malloc(sizeof(struct HeapNode));
+	mh->Data = (MinHElementType *)malloc((Capacity + 1) * sizeof(HMTree));
+	mh->Capacity = Capacity + 1;
+	
+	HMTree minhmtree = (HMTree)malloc(sizeof(struct HMNode));
+	minhmtree->Weight = MINDATA;
+	minhmtree->Left = minhmtree->Right = NULL;
+	
+	mh->Data[0] = minhmtree;
+	mh->Size = 0;
+	
+	return mh;
+}
+
+
+void fillData(MinHeap mh, WeightType *Data, int n) {
+	
+	for(int i = 1; i <= n; i++) {
+		
+		HMTree hmtree = (HMTree)malloc(sizeof(struct HMNode));
+		hmtree->Weight = Data[i - 1];
+		hmtree->Left = hmtree->Right = NULL;  // initialize huffman tree nodes
+		
+		mh->Data[i] = hmtree;
+		mh->Size = n;	
+	}
+	//printf("mh->Size is %d\n", mh->Size);
+}
+
+
+void printArr(MinHElementType *arr, int n) {
+	
+	for(int i = 1; i <= n; i++) {
+		if(i != 1) printf(" ");
+		printf("%d", arr[i]->Weight);
+	}
+	printf("\n");
+}
+
+void percolateUp(int pos, MinHeap mh) {
+	
+	MinHElementType elem = mh->Data[pos];
+	while( mh->Data[ pos / 2 ]->Weight > elem->Weight ) {
+		
+		mh->Data[pos] = mh->Data[ pos / 2];
+		pos /= 2;
+	}
+	mh->Data[pos] = elem;
+}
+
+void insert(MinHeap mh, HMTree X) {
+	
+	int pos = ++mh->Size;
+	mh->Data[pos] = X;
+	percolateUp(pos, mh);
+	
+}
+
+void percolateDown(int pos, MinHeap mh) {
+	
+	HMTree X = mh->Data[pos];
+	//printf("X->Weight is %d, mh->Size is %d\n", X->Weight, mh->Size);
+	
+	int parent = pos, child;
+	
+	//printf("I am here! parent is %d, mh->Data[parent] is %d, mh->Size is %d, X->Weight is %d\n", parent, mh->Data[parent]->Weight, mh->Size, X->Weight);
+	while(2 * parent <= mh->Size) {
+		
+		child = 2 * parent;
+//		printf("child is %d, child + 1 is %d, mh->Size is %d\n", child, child + 1, mh->Size);
+		//printf("mh->Data[child %d]->Weight is %d, mh->Data[child + 1 %d] is %d\n", child, mh->Data[child]->Weight, \
+		child + 1, mh->Data[child + 1]->Weight);
+		
+		//printf("Is it true? %d\n", mh->Data[child]->Weight > mh->Data[child + 1]->Weight);
+		
+		if(child != mh->Size && (mh->Data[child]->Weight > mh->Data[child + 1]->Weight)) child++;
+		//printf("child is %d\n", child);
+		if(mh->Data[child]->Weight >= X->Weight ) break;
+		
+		else {
+			mh->Data[parent] = mh->Data[child];
+			//printf("child %d was moved up to parent %d, mh->Data[parent %d]->Weight is now %d\n", \
+			child, parent, parent, mh->Data[parent]->Weight);
+		}
+		parent = child;	
+//		printf("hsdkfaeiororfroiir\n");
+	}
+	mh->Data[parent] = X;
+	//printf("mh->Data[parent %d] now is %d\n", parent, mh->Data[parent]->Weight);
+	//printArr(mh->Data, mh->Size);
+	
+	//printf("Can we meet again?\n");
+}
+
+HMTree deleteMin(MinHeap mh) {
+	
+	HMTree MinElem = mh->Data[1];
+	mh->Data[1] = mh->Data[mh->Size--];
+	percolateDown(1, mh);
+	
+	return MinElem;
+}
+
+void buildMinHeap(MinHeap mh) {
+	
+	int lastpos = mh->Size / 2;
+	
+	//printf("Hi I miss you! mh->Size is %d, mh->Capacity is %d, Building...\n", mh->Size, mh->Capacity);
+	for(int pos = lastpos; pos > 0; pos--) {
+		percolateDown(pos, mh);
+	}
+	//printf("Hello, will we see each other again?\n");
+}
+
+HMTree Huffman(MinHeap mh) {
+	
+	//printf("Hey hey! Let's build a Huffman tree...\n");
+	HMTree hmtree;
+	
+	buildMinHeap(mh);
+	//printf("Finished building MinHeap...\n");
+	//printArr(mh->Data, mh->Size);
+	
+	//printf("\n");
+	
+	int N = mh->Size; // !!Watch out, this N is necessary here!! Because mh->Size 
+	                  //is modified along the way in the process of heap building.
+	for(int i = 1; i < N; i++) {
+		hmtree = (HMTree)malloc(sizeof(struct HMNode));
+		hmtree->Left = deleteMin(mh);
+		//printf("Left->Weight is %d\n", hmtree->Left->Weight);
+		hmtree->Right = deleteMin(mh);
+		//printf("Right->Weight is %d\n", hmtree->Right->Weight);
+	
+		//printf("mh->Data is\n");
+		//printArr(mh->Data, mh->Size);
+		
+		hmtree->Weight = hmtree->Left->Weight + hmtree->Right->Weight;
+		insert(mh, hmtree);
+		//printf("mh->Data is\n");
+		//printArr(mh->Data, mh->Size);
+	}
+	
+	//printf("Hello, bye!\n");
+	return deleteMin(mh);
+}
+
+void preOrder(HMTree hmtree) {
+	if(hmtree) {
+		printf("%d ", hmtree->Weight);
+		preOrder(hmtree->Left);
+		preOrder(hmtree->Right);
+	}
+}
+
+WeightType calculateWPL(HMTree hmtree, int depth) {
+	
+	if(!hmtree->Left && !hmtree->Right) return depth * hmtree->Weight;
+	return calculateWPL(hmtree->Left, depth + 1) + calculateWPL(hmtree->Right, depth + 1);
+	
+}
+
+int comp(const void *a, const void *b) {
+	
+	if( strlen((char *)a) == strlen((char *)b) ) return strcmp((char *)a, (char *)b);
+	return strlen((char *)a) - strlen((char *)b) ;
+}
+
+int hasPrefix(char * string[], int n) {
+	int res = 0;
+	for(int i = 0; i < n - 1 ; i++) {
+	
+		//printf("%s, %d\n", string[i], strlen(string[i]));
+		for(int j = i + 1; j < n; j++) {
+			int pos = 0;
+			
+			while(string[i][pos] && string[j][pos]) {
+				if(string[i][pos] == string[j][pos]) pos++;
+				else break;
+			}
+			
+			if(!string[i][pos] || !string[j][pos]) res = 1;
+		}
+	}
+	
+	return res;
+}
+
+
+int main() {
+	
+	int n, m, chtofreq_map[125];  // the charactors fall into [45, 122]
+	scanf("%d\n", &n);	
+	
+	MinHeap mh = initializeMinHeap(n);
+	
+	char ch;
+	WeightType weight[n];
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%c", &ch);
+		scanf("%d", &weight[i]);
+		chtofreq_map[ch] = weight[i];
+		getchar();	
+	}
+	
+	fillData(mh, weight, n);
+	//printArr(mh->Data, mh->Size);
+	
+	HMTree hmtree = Huffman(mh);
+	
+	int wpl = calculateWPL(hmtree, 0);
+	//printf("wpl is %d\n", wpl);
+	
+	scanf("%d",&m);
+	getchar();
+	
+	char * strings[n];
+	
+	for(int i = 0; i < m; i++) {
+		
+		char ci, codei[n][64];
+		
+		
+		int wpl_in_quest = 0;
+		for(int j = 0; j < n; j++) {
+			scanf("%c %s", &ci, codei[j]);
+			getchar();
+			strings[j] = codei[j];
+		//	printf("%c %s %d, freq[%c] is %d\n", ci, codei[j], strlen(codei[j]), ci, chtofreq_map[ci]);
+			
+			wpl_in_quest += chtofreq_map[ci] * strlen(codei[j]);
+		}
+		//printf("wpl_in_quest is %d\n", wpl_in_quest);
+		
+//		for(int j = 0; j < n; j++) {
+//			printf("%s\n", strings[j]);
+//		}		
+		
+		qsort(codei, n, sizeof(codei[0]), comp);
+//		for(int j = 0; j < n; j++) {
+//			printf("%s\n", strings[j]);
+//		}
+		
+		int flag = hasPrefix(strings, n);
+		//printf("Does it? %d\n", hasPrefix(strings, n));
+		
+		if(wpl == wpl_in_quest && !flag) printf("Yes\n");
+		else printf("No\n");
+		
+	}
+	
+	return 0;
+}
