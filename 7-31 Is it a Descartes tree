@@ -1,0 +1,101 @@
+#include <stdio.h>
+#define MAX 1000
+#define Null -1
+
+
+typedef enum{false, true} bool;
+
+typedef int Tree;
+typedef int ElementType;
+
+typedef struct TreeNode{
+	ElementType k1, k2;
+	Tree Left, Right;
+}TN;
+
+TN T[MAX];
+
+ElementType in[MAX], pre[MAX];
+int idxin = 0, idxpre = 0;
+
+Tree createTree() {
+	int num;
+	scanf("%d", &num);
+	
+	if(!num) return Null;
+	
+	Tree root = Null;
+	bool isRoot[num];
+	for(int i = 0; i < num; i++) {
+		isRoot[i] = true;
+	}
+	
+	for(int i = 0; i < num; i++) {
+		scanf("%d %d %d %d", &T[i].k1, &T[i].k2, &T[i].Left, &T[i].Right);
+		if(T[i].Left != Null) isRoot[T[i].Left] = false;
+		if(T[i].Right != Null) isRoot[T[i].Right] = false;
+	}
+	
+	for(int i = 0; i < num; i++) {
+		if(isRoot[i]) root = i;
+	}
+	
+	return root;
+}
+
+void preOrder(Tree t) {
+	if(t != Null) {
+		printf("%d ", T[t].k2);
+		pre[idxpre++] = T[t].k2;
+		preOrder(T[t].Left);
+		preOrder(T[t].Right);
+	}
+}
+
+void inOrder(Tree t) {
+	if(t != Null) {
+		inOrder(T[t].Left);
+		in[idxin++] = T[t].k1;
+		//printf("%d ", T[t].k1);
+		inOrder(T[t].Right);
+	}
+}
+
+bool isBST(int numofnodes) {
+	
+	bool res = true;
+	for(int i = 0; i < numofnodes - 1; i++) {
+		if( in[i + 1] < in[i] ) res = false;
+	}
+	
+	return res;
+}
+
+bool isMH(Tree t) {
+	
+	if(t == Null) return true;
+	if(T[t].Right != Null) if(T[t].k2 > T[T[t].Right].k2) return false;
+	if(T[t].Left != Null) if(T[t].k2 > T[T[t].Left].k2) return false;
+	
+	if(!isMH(T[t].Left)) return false;
+	if(!isMH(T[t].Right)) return false;
+	
+	return  true ;
+}
+
+bool isDescartes(int numofnodes, Tree t) {
+	
+	return isBST(numofnodes) && isMH(t);	
+}
+
+int main() {
+    
+    Tree t;
+    t = createTree();
+    inOrder(t);
+    if(isDescartes(idxin, t)) printf("YES\n");
+    else printf("NO\n");
+    
+    
+    return 0;
+}
