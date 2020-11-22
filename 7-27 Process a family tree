@@ -1,0 +1,128 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAXNUM 100
+#define MAXL 10
+#define MAXN 70
+
+typedef struct prsn Person;
+struct prsn {
+	char Name[MAXL + 1];
+	int Parent;
+	int Generation;
+};
+
+typedef enum{false, true} bool;
+
+void readaLine(char *aLine) {
+	
+	int i = 0;
+	while( i < MAXN && (aLine[i] = getchar()) != '\n' ) i++;
+	aLine[i] = '\0';
+}
+
+void buildFamilyTree(Person *ft, int num) {
+	char aLine[MAXN + 1];
+	
+	for(int i = 0; i < num; i++) {
+		readaLine(aLine);
+		//printf("%s\n", aLine);
+		
+		int m = 0, n = 0;
+		
+		while(aLine[m] == ' ') m++;
+		ft[i].Generation = m / 2;
+		
+		while(aLine[m]) {
+			ft[i].Name[n++] = aLine[m++];
+		}
+		ft[i].Name[n] = '\0';
+		
+		//printf("%d %s %d\n", i, ft[i].Name, ft[i].Generation);
+		
+		if(i == 0) ft[i].Parent = -1;
+		else {
+			for(int j = i - 1; j >= 0; j--) {
+				if(ft[i].Generation - ft[j].Generation == 1) {
+					ft[i].Parent = j;
+					break;
+				}
+			}
+		}	
+	}
+}
+
+void printFamilyTree(Person *ft, int num) {
+	
+	for(int i = 0; i < num; i++) {
+		for(int j = 0; j < 2 * ft[i].Generation; j++) printf(" ");
+		printf("%s, gen: %d,", ft[i].Name, ft[i].Generation);
+		if(ft[i].Generation != 0) printf(" parent: %s\n", ft[ft[i].Parent].Name);
+		else printf("\n");
+	}
+}
+
+int findPos(Person *ft, char *name, int n) {
+	int res = 0;
+	for(int i = 0; i < n; i++) {
+		if(!strcmp(ft[i].Name, name)) res = i;
+	}
+	return res;
+}
+
+bool isChild(Person *ft, int posX, int posY) {
+	
+	return ft[posX].Parent == posY;
+}
+
+bool isParent(Person *ft, int posX, int posY) {
+	return ft[posY].Parent == posX;
+}
+
+bool isSibling(Person *ft, int posX, int posY) {
+	return ft[posX].Parent == ft[posY].Parent;
+}
+
+bool isAncestor(Person *ft, int posX, int posY) {
+	if(ft[posX].Parent == -1) return true;
+	while(ft[posY].Parent != -1 && ft[posY].Parent != posX) posY = ft[posY].Parent;
+	return !(ft[posY].Parent == -1);
+}
+
+bool isDescendant(Person *ft, int posX, int posY) {
+//	printf("%d %d\n", posX, posY);
+	return isAncestor(ft, posY, posX);
+}
+
+void verify(Person *familytree, int m, int n) {
+	
+	char X[MAXL + 1], article[4], relation[MAXL + 1], Y[MAXL + 1];
+	for(int i = 0; i < m; i++) {
+		scanf("%s is %s %s of %s", X, article, relation, Y);
+//		printf("%s %s %s %s\n", X, article, relation, Y);
+		int posX = findPos(familytree, X, n), posY = findPos(familytree, Y, n);
+		
+		bool result;
+		if(!strcmp(relation, "child")) result = isChild(familytree, posX, posY);
+		else if(!strcmp(relation, "parent")) result = isParent(familytree, posX, posY);
+		else if(!strcmp(relation, "ancestor")) result = isAncestor(familytree, posX, posY);
+		else if(!strcmp(relation, "sibling")) result = isSibling(familytree, posX, posY);
+		else result = isDescendant(familytree, posX, posY);
+		
+		if(result) printf("True\n");
+		else printf("False\n");
+	}
+}
+
+int main() {
+	
+	int n, m;
+	scanf("%d %d\n", &n, &m);
+	
+	Person familytree[n];
+	buildFamilyTree(familytree, n);
+	
+	verify(familytree, m, n);
+
+	return 0;
+}
