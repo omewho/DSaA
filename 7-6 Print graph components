@@ -1,0 +1,141 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define INFINITY 65535
+#define MaxVertexNum 10
+
+typedef enum{false, true } bool ;
+
+typedef int Vertex;
+typedef int WeightType;
+
+typedef struct EdgeNode *Edge;
+struct EdgeNode {
+	Vertex V1, V2;
+};
+
+typedef struct GNode *PtrToGNode;
+struct GNode {
+	int Nv;
+	int Ne;
+	WeightType G[MaxVertexNum][MaxVertexNum];
+};
+typedef PtrToGNode MGraph;
+
+bool Visited[MaxVertexNum];
+
+MGraph createMGraph() {
+	
+	MGraph Graph = (MGraph)malloc(sizeof(struct GNode));
+	scanf("%d%d", &Graph->Nv, &Graph->Ne);
+	//printf("%d %d\n", Graph->Nv, Graph->Ne);
+	
+	Vertex V, W;
+	for(V = 0; V < Graph->Nv; V++) {
+		for(W = 0; W < Graph->Nv; W++) {
+			Graph->G[V][W] = INFINITY;
+		}
+	}
+	
+	for(int i = 0; i < Graph->Ne; i++) {
+		scanf("%d%d", &V, &W);
+		Graph->G[V][W] = 0;
+		Graph->G[W][V] = 0;
+	}
+	
+	return Graph;
+}
+
+void Visit(Vertex V) {
+	printf(" %d", V);
+}
+
+void printGraph(MGraph Graph) {
+	Vertex V, W;
+	for(V = 0; V < Graph->Nv; V++) {
+		for(W = 0; W < Graph->Nv; W++) {
+			if(Graph->G[V][W] < INFINITY) printf(" 1 ");
+			else printf(" 0 ");
+		}
+		printf("\n");
+	}
+}
+
+void DFS(MGraph Graph, Vertex V, void(* visit) (Vertex)) {
+	
+	Visit(V);
+	Visited[V] = true;
+	
+	Vertex W;
+	for(W = 0; W < Graph->Nv; W++) {
+		if(!Visited[W] && Graph->G[V][W] < INFINITY) {
+			DFS(Graph, W, Visit);
+		}
+	}	
+}
+
+void BFS(MGraph Graph, Vertex S, void(*visit) (Vertex)) {
+	
+	Vertex Queue[MaxVertexNum + 1], V, W;
+	int front = 0, rear = 0;
+	
+	Queue[rear++] = S;
+	
+	Visit(S);
+	Visited[S] = true;
+	
+	while(front != rear) {
+		
+		V = Queue[front++];
+		for(W = 0; W < Graph->Nv; W++) {
+			if(!Visited[W] && Graph->G[V][W] < INFINITY) {
+				Visit(W);
+				Visited[W] = true;
+				Queue[rear++] = W;
+			}
+		}
+		
+	}
+	
+}
+
+void printDFS(MGraph Graph, void(* visit )(Vertex)) {
+	
+	Vertex V;
+	for(V = 0; V < Graph->Nv; V++) {
+		if(!Visited[V]) {
+			printf("{");
+			DFS(Graph, V, Visit);
+			printf(" }\n");
+		}
+	}
+}
+
+void printBFS(MGraph Graph, void(* visit )(Vertex)) {
+	
+	Vertex V;
+	for(V = 0; V < Graph->Nv; V++) {
+		if(!Visited[V]) {
+			printf("{");
+			BFS(Graph, V, Visit);
+			printf(" }\n");
+		}
+	}
+}
+
+
+int main() {
+	
+	MGraph Graph = createMGraph();
+	
+	//printGraph(Graph);
+	
+	//DFS(Graph, Visit); 
+	printDFS(Graph, Visit);
+	
+	for(Vertex V = 0; V < MaxVertexNum; V++) Visited[V] = false;
+	printBFS(Graph, Visit);
+	
+	return 0;
+}
+
