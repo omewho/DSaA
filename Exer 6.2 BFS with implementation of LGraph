@@ -1,0 +1,209 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef enum {false, true} bool;
+#define MaxVertexNum 10   /* 最大顶点数设为10 */
+typedef int Vertex;       /* 用顶点下标表示顶点,为整型 */
+
+/* 邻接点的定义 */
+typedef struct AdjVNode *PtrToAdjVNode; 
+struct AdjVNode{
+    Vertex AdjV;        /* 邻接点下标 */
+    PtrToAdjVNode Next; /* 指向下一个邻接点的指针 */
+};
+
+/* 顶点表头结点的定义 */
+typedef struct Vnode{
+    PtrToAdjVNode FirstEdge; /* 边表头指针 */
+} AdjList[MaxVertexNum];     /* AdjList是邻接表类型 */
+
+/* 图结点的定义 */
+typedef struct GNode *PtrToGNode;
+struct GNode{  
+    int Nv;     /* 顶点数 */
+    int Ne;     /* 边数   */
+    AdjList G;  /* 邻接表 */
+};
+typedef PtrToGNode LGraph; /* 以邻接表方式存储的图类型 */
+
+bool Visited[MaxVertexNum]; /* 顶点的访问标记 */
+
+LGraph CreateGraph(); /* 创建图并且将Visited初始化为false；裁判实现，细节不表 */
+
+void Visit( Vertex V ) {
+    printf(" %d", V);
+}
+
+void printList(PtrToAdjVNode firstEdge) {
+	
+	while(firstEdge) {
+		Visit(firstEdge->AdjV);
+		firstEdge = firstEdge->Next;
+	}
+}
+
+void printGraph(LGraph Graph, void(*Visit)(Vertex)) {
+	
+	Vertex V;
+	
+	PtrToAdjVNode pAdj;
+	for(V = 0; V < Graph->Nv; V++) {
+		
+		Visit(V);
+		printf(":");
+		
+		pAdj = Graph->G[V].FirstEdge;
+		
+		printList(pAdj);
+		printf("\n");
+	}
+}
+
+void BFS ( LGraph Graph, Vertex S, void (*Visit)(Vertex) );
+
+int main() {
+    LGraph G;
+    Vertex S;
+
+    G = CreateGraph();
+    scanf("%d", &S);
+    
+    printGraph(G, Visit);
+    printf("BFS from %d:", S);
+    BFS(G, S, Visit);
+
+    return 0;
+}
+
+/* Test data set:
+
+7 9
+0 3
+0 2
+0 4
+2 3
+2 5
+1 5
+4 5
+5 6
+1 3
+2
+
+*/
+
+
+LGraph CreateGraph() {
+	
+	LGraph Graph = (LGraph)malloc(sizeof(struct GNode));
+	scanf("%d%d", &(Graph->Nv), &(Graph->Ne));
+	
+	Vertex V;
+	for(V = 0; V < Graph->Nv; V++) {
+		
+		Visited[V] = false;
+		Graph->G[V].FirstEdge = NULL;
+	}
+	
+	int i;
+	Vertex v1, v2;
+	for(i = 0; i < Graph->Ne; i++) {
+		scanf("%d%d", &v1, &v2);
+		//printf("v1 = %d %d\n", v1, v2);
+		PtrToAdjVNode nd = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode)), p, last;
+		nd->AdjV = v2;
+		nd->Next = NULL;
+		
+		p = Graph->G[v1].FirstEdge;
+		
+		if(!p) Graph->G[v1].FirstEdge = nd;
+		else {
+			
+			if(p->AdjV > nd->AdjV) {
+				
+				nd->Next = p;
+				Graph->G[v1].FirstEdge = nd;
+			}
+			
+			else {
+				while( p && p->AdjV < nd->AdjV) {
+					//printf("p adj is %d\n", p->AdjV);
+					last = p;
+					p = p->Next;
+				}
+				
+				if(p) {
+					nd->Next = last->Next;
+					last->Next = p;
+				}
+				else last->Next = nd;			//insert v2 to the right place on list Graph->G[v1]				
+				
+			}	
+		}
+		
+		
+		nd = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode));
+		nd->AdjV = v1;
+		nd->Next = NULL;
+		
+		p = Graph->G[v2].FirstEdge;
+		
+		if(!p) Graph->G[v2].FirstEdge = nd;
+		else {
+			
+			if(p->AdjV > nd->AdjV) {
+				nd->Next = p;
+				Graph->G[v2].FirstEdge = nd;
+			}
+			
+			else {
+				while( p && p->AdjV < nd->AdjV) {
+					//printf("p is %d\n", p->AdjV);
+					last = p;
+					p = p->Next;
+				}
+				
+				if(p) {
+					nd->Next = last->Next;
+					last->Next = nd;
+				}	
+				else last->Next = nd;	
+				  //insert v1 to the right place on list Graph->G[v2] 	
+			}
+			
+		} 
+		//printf("ahslf\n");
+	}
+	
+	return Graph;
+}
+
+Vertex Queue[MaxVertexNum * MaxVertexNum];
+typedef int Position;
+Position front, rear;
+Position front = 0, rear = 0;
+
+void BFS ( LGraph Graph, Vertex S, void (*Visit)(Vertex) ) {
+	
+	Visited[S] = true;
+	Visit(S);
+	
+	Vertex V;
+	
+	Queue[rear++] = S;
+	
+	while(front != rear) {
+		
+		V = Queue[front++];
+		
+		PtrToAdjVNode pAdj = Graph->G[V].FirstEdge;
+		while(pAdj) {
+			if(!Visited[pAdj->AdjV]) {
+				Visit(pAdj->AdjV);
+				Visited[pAdj->AdjV] = true;
+				Queue[rear++] = pAdj->AdjV;
+			}
+			
+			pAdj = pAdj->Next;
+		}
+	}
+}
