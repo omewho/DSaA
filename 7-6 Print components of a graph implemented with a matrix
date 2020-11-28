@@ -94,9 +94,7 @@ void BFS(MGraph Graph, Vertex S, void(*visit) (Vertex)) {
 				Queue[rear++] = W;
 			}
 		}
-		
 	}
-	
 }
 
 void printDFS(MGraph Graph, void(* visit )(Vertex)) {
