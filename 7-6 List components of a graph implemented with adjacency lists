@@ -1,0 +1,189 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MaxVertexNum 10
+
+typedef enum{false, true} bool;
+typedef int Vertex;
+
+typedef struct AdjVNode * PtrToAdjVNode;
+struct AdjVNode{
+	Vertex AdjV;
+	PtrToAdjVNode Next;
+};
+
+typedef struct VertexNode {
+	PtrToAdjVNode FirstEdge;
+} AdjList[MaxVertexNum];
+
+typedef struct GNode* PtrToGNode;
+struct GNode {
+	int Nv;
+	int Ne;
+	AdjList G;
+};
+typedef PtrToGNode LGraph;
+
+bool Visited[MaxVertexNum];
+
+void insertANode( LGraph Graph, Vertex V, Vertex AdjV ) {
+	
+	PtrToAdjVNode pAdj = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode)), \
+	current = Graph->G[V].FirstEdge, previous;
+	pAdj->AdjV = AdjV;
+	pAdj->Next = NULL;
+	
+	if(!current) Graph->G[V].FirstEdge = pAdj;
+	
+	else {
+		if(current->AdjV > pAdj->AdjV) {
+			
+			pAdj->Next = Graph->G[V].FirstEdge;
+			Graph->G[V].FirstEdge = pAdj; 
+		}
+		
+		else { //current->AdjV < pAdj->AdjV
+			
+			while(current && pAdj->AdjV > current->AdjV ) {
+				
+				previous = current;
+				current = current->Next;
+			}
+			
+			if(current) {
+				
+				pAdj->Next = current;
+			}
+			previous->Next = pAdj;
+		}		
+	}	
+}
+
+void Visit(Vertex V) {
+	
+	printf(" %d", V);
+}
+
+void printList(PtrToAdjVNode firstEdge) {
+	
+	PtrToAdjVNode current = firstEdge;
+	while(current) {
+		Visit(current->AdjV);
+		current = current->Next;
+	}
+}
+
+void printLGraph(LGraph Graph) {
+	
+	Vertex V;
+	for(V = 0; V < Graph->Nv; V++) {
+		printf("%d:", V);
+		printList(Graph->G[V].FirstEdge);
+		printf("\n");
+	}
+}
+
+LGraph createLGraph() {
+	
+	LGraph Graph = (LGraph)malloc(sizeof(struct GNode));
+	scanf("%d%d", &Graph->Nv, &Graph->Ne);
+	
+	Vertex V, W;
+	for(V = 0; V < Graph->Nv; V++) {
+		Graph->G[V].FirstEdge = NULL; 
+	}
+	
+	for(int i = 0; i < Graph->Ne; i++) {
+		scanf("%d%d", &V, &W);
+		insertANode(Graph, V, W);
+		insertANode(Graph, W, V);
+	}
+	
+	return Graph;
+}
+
+void DFS(LGraph Graph, Vertex V, void(*visit) (Vertex)) {
+	
+	//Vertex V;
+	Visit(V);
+	Visited[V] = true;
+	
+	PtrToAdjVNode pAdj = Graph->G[V].FirstEdge;
+	while(pAdj) {
+		
+		if( !Visited[pAdj->AdjV] ) {
+			Visited[pAdj->AdjV] = true;
+			DFS(Graph, pAdj->AdjV, Visit);
+		}
+		pAdj = pAdj->Next;
+	}
+}
+
+void printDFS(LGraph Graph, void(*visit)(Vertex)) {
+	
+	Vertex V;
+	
+	for(V = 0; V < Graph->Nv; V++) {
+		
+		if(!Visited[V]) {
+			printf("{");
+			DFS(Graph, V, Visit);
+			printf(" }\n");			
+		}
+	}
+}
+
+void resetVisited(int VertexNum) {
+	
+	for(int i = 0; i < VertexNum; i++) Visited[i] = false;
+}
+
+void BFS(LGraph Graph, Vertex S, void(*visit) (Vertex)) {
+	
+	Vertex Queue[Graph->Nv], V;
+	PtrToAdjVNode pAdj;
+	int front = 0, rear = 0;
+	
+	Queue[rear++] = S;
+	Visit(S);
+	Visited[S] = true;
+	
+	while(front != rear) {
+		
+		V = Queue[front++];
+		pAdj = Graph->G[V].FirstEdge;
+		while(pAdj) {
+			if(!Visited[pAdj->AdjV]) {
+				Visit(pAdj->AdjV);
+				Visited[pAdj->AdjV] = true;
+				Queue[rear++] = pAdj->AdjV;
+			}
+			pAdj = pAdj->Next;
+		}
+	}
+}
+
+void printBFS(LGraph Graph, void(* visit)(Vertex)) {
+	
+	Vertex V;
+	for(V = 0; V < Graph->Nv; V++) {
+		if(!Visited[V]) {
+			printf("{");
+			BFS(Graph, V, Visit);
+			printf(" }\n");
+		}
+	}
+}
+
+
+int main() {
+	
+	LGraph Graph = createLGraph();
+	//printLGraph(Graph);
+	
+	printDFS(Graph, Visit);
+	
+	resetVisited(Graph->Nv);
+	printBFS(Graph, Visit);
+	return 0;
+}
