@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#define MAXN 100
+#define radius 15
+
+typedef struct coord{
+	int X, Y;
+} Point;
+
+int max_jump_dist;
+
+typedef enum{ false, true } bool;
+typedef int Vertex;
+
+struct GNode {
+	int Nv;
+	Point *Pos_Crocs;
+};
+typedef struct GNode *Graph;
+
+Graph createGraph() {
+	Graph G = (Graph)malloc(sizeof(struct GNode));
+	scanf("%d%d", &G->Nv, &max_jump_dist);
+	
+	G->Pos_Crocs = (Point *)malloc( (G->Nv) * sizeof(Point) );
+	
+	for(int i = 0; i < G->Nv; i++) {
+		scanf("%d%d", &G->Pos_Crocs[i].X, &G->Pos_Crocs[i].Y);
+		//printf("%d %d\n", G->Pos_Crocs[i].X, G->Pos_Crocs[i].Y);
+	}
+	
+	return G;
+}
+
+//void printGraph(Graph G) {
+//	
+//	for(int i = 0; i < G->Nv; i++) {
+//		
+//		printf("%d %d %d\n", i, G->Pos_Crocs[i].X, G->Pos_Crocs[i].Y);
+//	}
+//}
+
+int firstcrocs[MAXN];
+int idx = 0;
+
+double getDist(Point a, Point b) {
+	
+	return sqrt( (a.X -b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y) );
+}
+
+
+bool Visited[MAXN];
+
+bool isSaved(Point P) {
+	
+	return abs( P.X - 50 ) <= max_jump_dist || abs( P.X + 50 ) <= max_jump_dist \
+	|| abs( P.Y - 50 ) <= max_jump_dist || abs( P.Y + 50 ) <= max_jump_dist;
+}
+
+bool isInRange(Point P, Point this_pos) {
+	
+	return getDist(P, this_pos) <= max_jump_dist;
+}
+
+bool DFS(Graph G, Vertex firstcroc) {
+	
+	bool res = false;
+
+	Visited[firstcroc] = true;
+	Vertex V;
+	
+	if( isSaved(G->Pos_Crocs[firstcroc]) ) {
+		
+		//printf("i is %d, %d %d\n", firstcroc, G->Pos_Crocs[firstcroc].X, G->Pos_Crocs[firstcroc].Y);
+		res = true;
+	} 
+	
+	else {
+		for(V = 0; V < G->Nv; V++) {
+			if( !Visited[V] && isInRange(G->Pos_Crocs[firstcroc], G->Pos_Crocs[V]) ) {
+				//printf("V is %d, %d %d\n", V, G->Pos_Crocs[V].X, G->Pos_Crocs[V].Y);
+				res = DFS(G, V);
+			}
+			if( res ) break; 
+		}
+	}
+	return res;
+	
+}
+
+void saveJames(Graph G) {
+
+	Point P;
+	P.X = 0, P.Y = 0; 
+		
+	Vertex firstcroc;
+	
+	bool saved = false;
+	
+	for(firstcroc = 0; firstcroc < G->Nv; firstcroc++) {
+		if( getDist(G->Pos_Crocs[firstcroc], P) <= max_jump_dist * 1.0 + radius * 1.0 / 2) {
+			
+			//printf("first is %d, %d %d\n", firstcroc, G->Pos_Crocs[firstcroc].X, G->Pos_Crocs[firstcroc].Y);
+			saved = DFS(G, firstcroc);
+			if(saved) break;
+		}
+	}
+	if(saved) printf("Yes\n");
+	else printf("No\n");
+		
+}
+
+
+int main() {
+
+	int max_jump_dist;
+	Graph G = createGraph();
+	
+	saveJames(G);
+	
+    return 0;
+}
