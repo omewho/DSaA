@@ -1,0 +1,145 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef enum {false, true} bool;
+#define MaxVertexNum 10  /* maximum number of vertices */
+typedef int Vertex;      /* vertices are numbered from 0 to MaxVertexNum-1 */
+
+typedef struct AdjVNode *PtrToAdjVNode; 
+struct AdjVNode{
+    Vertex AdjV;
+    PtrToAdjVNode Next;
+};
+
+typedef struct Vnode{
+    PtrToAdjVNode FirstEdge;
+} AdjList[MaxVertexNum];
+
+typedef struct GNode *PtrToGNode;
+struct GNode{  
+    int Nv;
+    int Ne;
+    AdjList G;
+};
+typedef PtrToGNode LGraph;
+
+void insertAdjVNode(PtrToAdjVNode *first, Vertex v) {
+	
+	PtrToAdjVNode pAdj = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode));
+	pAdj->AdjV = v;
+	pAdj->Next = NULL;
+	
+	if(!(*first)) *first = pAdj;
+	else {
+		if((*first)->AdjV > v) {
+			pAdj->Next = (*first)->Next;
+			(*first) = pAdj;
+		}
+		
+		else {  // v > first->Adj
+			PtrToAdjVNode p = *first, previous;
+			while( p && p->AdjV < v) {
+				
+				previous = p;
+				p = p->Next;
+			}
+			
+			if(!p) previous->Next = pAdj;
+			else {
+				
+				pAdj->Next = p;
+				previous->Next = pAdj;
+			}
+		}
+	}
+}
+
+LGraph ReadG() {/* details omitted */
+	
+	LGraph Graph = (LGraph)malloc(sizeof(struct GNode));
+	scanf("%d%d", &Graph->Nv, &Graph->Ne);
+	
+	for(int i = 0; i < Graph->Nv; i++) {
+		Graph->G[i].FirstEdge = NULL;
+	}
+	
+	PtrToAdjVNode pAdj;
+	Vertex v1, v2;
+	for(int i = 0; i < Graph->Ne; i++) {
+		scanf("%d%d", &v1, &v2);
+//		pAdj = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode));
+//		pAdj->AdjV = v2;
+//		pAdj->Next = Graph->G[v1].FirstEdge;
+//		
+//		Graph->G[v1].FirstEdge = pAdj;
+		
+		PtrToAdjVNode *pFirst = &(Graph->G[v1].FirstEdge);
+		insertAdjVNode(pFirst, v2);
+	}
+	
+	
+	return Graph;
+}
+
+void printList(PtrToAdjVNode firstEdge) {
+	
+	while(firstEdge) {
+		printf(" %d", firstEdge->AdjV);
+		firstEdge = firstEdge->Next;
+	}
+	printf("\n");
+}
+
+void printLGraph(LGraph Graph) {
+	
+	for(int i = 0; i < Graph->Nv; i++) {
+		
+		printf("%d:", i);
+		printList(Graph->G[i].FirstEdge);
+	}
+}
+
+void ShortestDist( LGraph Graph, int dist[], Vertex S );
+
+int main()
+{
+    int dist[MaxVertexNum];
+    Vertex S, V;
+    LGraph G = ReadG();
+
+    scanf("%d", &S);
+    printLGraph(G);
+    ShortestDist( G, dist, S );
+
+    for ( V=0; V<G->Nv; V++ )
+        printf("%d ", dist[V]);
+
+    return 0;
+}
+
+void ShortestDist( LGraph Graph, int dist[], Vertex S ) {
+	
+	Vertex Queue[MaxVertexNum];
+	Vertex front = 0, rear = 0;
+	
+	Queue[rear++] = S;
+	
+	for(int i = 0; i < Graph->Nv; i++) dist[i] = -1;
+	dist[S] = 0;
+	
+	while(front != rear) {
+		
+		Vertex u = Queue[front++], v;
+		PtrToAdjVNode pAdj = Graph->G[u].FirstEdge;
+		while(pAdj) {
+			v = pAdj->AdjV;
+			if(dist[v] == -1) {
+				dist[v] = dist[u] + 1;
+				Queue[rear++] = v;
+			}
+			pAdj = pAdj->Next;
+		}
+		
+	}
+	
+}
