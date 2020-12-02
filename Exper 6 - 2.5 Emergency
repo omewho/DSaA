@@ -1,0 +1,139 @@
+#include <stdio.h>
+#define MAXN 500
+
+const int INF = 1e9;
+
+typedef enum { false, true } bool;
+typedef int Vertex;
+typedef int WeightType;
+
+WeightType distances[MAXN][MAXN], shortestDists[MAXN];
+
+int shortestPathNums[MAXN], teamNums[MAXN], teamNumCollected[MAXN];
+
+Vertex previousCity[MAXN], stack[MAXN];
+
+int s_idx = 0;
+
+bool cityCollected[MAXN];
+
+void initializeMap(int numofCities) {
+	
+	for(Vertex u = 0; u < numofCities; u++) {
+		
+		for(Vertex v = 0; v < numofCities; v++) {
+			distances[u][v] = INF;
+			distances[v][u] = INF;
+		}
+	}
+}
+
+void initialize(int n, int Start) {
+	
+	for(Vertex v = 0; v < n; v++) {
+		if( v == Start ) {
+			teamNumCollected[v] = teamNums[v];
+			shortestDists[v] = 0;
+			shortestPathNums[v] = 1;
+		}
+		else shortestDists[v] = INF;
+		
+		previousCity[v] = -1;
+	}
+}
+
+void readMap(int numofEdges) {
+	
+	Vertex city1, city2;
+	WeightType length;
+	
+	for(int i = 0; i < numofEdges; i++) {
+		scanf("%d%d%d", &city1, &city2, &length);
+		distances[city1][city2] = distances[city2][city1] = length;		
+	}
+} 
+
+void Dijkstra(int numofCities, Vertex Start) {
+	
+	initialize(numofCities, Start);
+	
+	while(true) {
+		
+		Vertex u = -1, v;
+		WeightType MinDist = INF;
+		
+		for(Vertex w = 0; w < numofCities; w++) {
+			if ( !cityCollected[w] && MinDist > shortestDists[w] ) {	
+				u = w;
+				MinDist = shortestDists[u];
+			}
+		}
+		
+		if(u == -1) break;
+		cityCollected[u] = true;
+		
+		for( v = 0; v < numofCities; v++) {
+			if( !cityCollected[v]  && distances[u][v] < INF) { // an edge exists between u and v
+				if(shortestDists[u] + distances[u][v] < shortestDists[v]) {
+					shortestDists[v] = shortestDists[u] + distances[u][v];
+					previousCity[v] = u;
+					shortestPathNums[v] = shortestPathNums[u];
+					teamNumCollected[v] = teamNumCollected[u] + teamNums[v];
+					
+				}
+				else if(shortestDists[u] + distances[u][v] == shortestDists[v]) {
+					shortestPathNums[v] += shortestPathNums[u];
+					if(teamNumCollected[u] + teamNums[v] > teamNumCollected[v]) {
+						previousCity[v] = u;
+						teamNumCollected[v] = teamNumCollected[u] + teamNums[v];
+					}
+				}
+				
+			}
+		}
+	}
+	
+}
+
+void pathTraversal(Vertex Destination) {
+	
+	while(Destination != -1) {
+		stack[s_idx++] = Destination;
+		Destination = previousCity[Destination];
+	}
+}
+
+void printStack(int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", stack[n - i - 1]);
+	}
+	printf("\n");
+}
+//void getPath(){
+//	
+//}
+
+int main() {
+	
+
+	int n, m, S, D;
+	scanf("%d%d%d%d", &n, &m, &S, &D);
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &teamNums[i]);
+	}
+		
+	initializeMap(n);
+	
+	readMap(m);
+
+	Dijkstra(n, S);
+	printf("%d %d\n", shortestPathNums[D], teamNumCollected[D]);
+	
+	pathTraversal(D);
+	printStack(s_idx);
+    
+    return 0;
+}
