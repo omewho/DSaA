@@ -1,0 +1,46 @@
+void ShortestDist( MGraph Graph, int dist[], Vertex S ) {
+	
+	bool collected[Graph->Nv];
+	
+	for(int i = 0; i < Graph->Nv; i++) {
+		collected[i] = false;
+	}
+	
+	Vertex w, u, v;
+	for(w = 0; w < Graph->Nv; w++) {
+		dist[w] = INFINITY;
+	}
+	dist[S] = 0;
+	
+	while(true) {
+		//printf("Hello!\n");
+		u = -1;
+		WeightType MinDist = INFINITY;
+			
+		for(w = 0; w < Graph->Nv; w++) {
+			
+			if( !collected[w] && dist[w] < MinDist) {
+				u = w;
+				MinDist = dist[w];
+			}	 
+		}
+		//printf("u is %d, Min is %d\n", u, MinDist);
+		if(u == -1) break;
+		collected[u] = true;
+		
+		for(v = 0; v < Graph->Nv; v++) {
+			
+			if( !collected[v] && Graph->G[u][v] < INFINITY ) {
+				if( dist[u] + Graph->G[u][v] < dist[v] ) {
+					dist[v] = dist[u] + Graph->G[u][v];
+				}
+			}
+		}
+				
+	}
+	
+	for(v = 0; v < Graph->Nv; v++) {
+		if(dist[v] == INFINITY) dist[v] = -1;
+	}
+	
+}
