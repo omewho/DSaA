@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef enum {false, true} bool;
+#define INFINITY 1000000
+#define MaxVertexNum 10  /* maximum number of vertices */
+typedef int Vertex;      /* vertices are numbered from 0 to MaxVertexNum-1 */
+typedef int WeightType;
+
+typedef struct GNode *PtrToGNode;
+struct GNode{
+    int Nv;
+    int Ne;
+    WeightType G[MaxVertexNum][MaxVertexNum];
+};
+typedef PtrToGNode MGraph;
+
+MGraph ReadG() {/* details omitted */
+	
+	MGraph Graph = (MGraph)malloc(sizeof(struct GNode));
+	scanf("%d%d", &Graph->Nv, &Graph->Ne);
+	
+	Vertex v1, v2;
+	for(v1 = 0; v1 < Graph->Nv; v1++) {
+		for(v2 = 0; v2 < Graph->Nv; v2++) {
+			Graph->G[v1][v2] = INFINITY;
+		}
+	}
+	
+	WeightType weight;
+	for(int i = 0; i < Graph->Ne; i++) {
+		scanf("%d%d%d", &v1, &v2, &weight);
+		Graph->G[v1][v2] = weight;
+	}
+	
+	return Graph;
+}
+
+void printMGraph(MGraph Graph) {
+	Vertex v, w;
+	for(v = 0; v < Graph->Nv; v++) {
+		for(w = 0; w < Graph->Nv; w++) {
+			if(w) printf(" ");
+			printf("%d", Graph->G[v][w]);
+		}
+		printf("\n");
+	}
+}
+ 
+
+void ShortestDist( MGraph Graph, int dist[], int path[], Vertex S );
+
+int main()
+{
+    int dist[MaxVertexNum], path[MaxVertexNum];
+    Vertex S, V;
+    MGraph G = ReadG();
+    //printMGraph(G);
+
+    scanf("%d", &S);
+    ShortestDist( G, dist, path, S );
+
+    for ( V=0; V<G->Nv; V++ )
+        printf("%d ", dist[V]);
+    printf("\n");
+    for ( V=0; V<G->Nv; V++ )
+        printf("%d ", path[V]);
+    printf("\n");
+
+    return 0;
+}
+
+
+void ShortestDist( MGraph Graph, int dist[], int path[], Vertex S ) {
+	
+	bool collected[Graph->Nv];
+	
+	Vertex u, v, w;
+	
+	for(w = 0; w < Graph->Nv; w++) {
+		dist[w] = INFINITY;
+		path[w] = -1;
+		collected[w] = false;
+	}
+	dist[S] = 0;
+	
+	while(true) {
+		
+		WeightType MinDist = INFINITY;
+		u = -1;
+		for(w = 0; w < Graph->Nv; w++) {
+			
+			if(!collected[w] && dist[w] < MinDist) {
+				u = w;
+				MinDist = dist[w];
+			}
+		}
+		//printf("u is %d, Min is %d\n", u, MinDist);
+		if(u == -1) break;
+		
+		collected[u] = true;
+		
+		for(v = 0; v < Graph->Nv; v++) {
+			
+			if( !collected[v] && Graph->G[u][v] < INFINITY) {
+				
+				if( dist[u] + Graph->G[u][v] < dist[v]) {
+					dist[v] = dist[u] + Graph->G[u][v];
+					path[v] = u;
+				}
+				else if(dist[u] + Graph->G[u][v] == dist[v]) {
+					//count[v] += count[u];
+				}
+			}
+		}		
+		
+	}
+	
+	for(w = 0; w < Graph->Nv; w++) {
+		if(dist[w] == INFINITY) dist[w] = -1;
+	}
+	
+}
