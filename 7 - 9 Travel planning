@@ -1,0 +1,118 @@
+#include <stdio.h>
+
+#define MaxVertexNum 500
+
+const int INFINITY = 1e8;
+typedef int Vertex;
+typedef int WeightType;
+
+typedef enum {
+	false, true
+} bool;
+
+WeightType map[MaxVertexNum][MaxVertexNum],cost[MaxVertexNum][MaxVertexNum], \
+shortestDist[MaxVertexNum], leastCost[MaxVertexNum];
+
+bool cityCollected[MaxVertexNum];
+
+void readMap(int n, int m) {
+	
+	Vertex city1, city2;
+	for(city1 = 0; city1 < n; city1++) {
+		for(city2 = 0; city2 < n; city2++) {
+			map[city1][city2] = INFINITY;
+			cost[city1][city2] = INFINITY;
+		}
+	}
+	
+	WeightType dis, cst;
+	for(int i = 0; i < m; i++) {
+		scanf("%d%d%d%d", &city1, &city2, &dis, &cst);
+		map[city1][city2] = map[city2][city1] = dis;
+		cost[city1][city2] = cost[city2][city1] = cst;
+	}
+}
+
+void initialize(int n, Vertex S) {
+	
+	for(int i = 0; i < n; i++) {
+		
+		shortestDist[i] = INFINITY;
+		leastCost[i] = INFINITY;
+	}
+	shortestDist[S] = 0;
+	leastCost[S] = 0;
+}
+
+void printArr(WeightType *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if (i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+void printMap(int n) {
+	
+	for(int i = 0; i < n; i++) {
+		for(int j = 0; j < n; j++) {
+			if(j) printf(" ");
+			printf("%d", cost[i][j]);
+		}
+		printf("\n");
+	}
+}
+
+void Dijkstra(int n, Vertex S) {
+	
+	initialize(n, S);
+	
+	while(true) {
+		//printf("hello\n");
+		Vertex u = -1, v, w;
+		WeightType MinDist = INFINITY;
+		for(w = 0; w < n; w++) {
+			if( !cityCollected[w] && shortestDist[w] < MinDist) {
+				u = w;
+				MinDist = shortestDist[w];
+			}
+		}
+		if( u == -1) {
+			//printf("Finished.\n");
+			break;
+		}
+		cityCollected[u] = true;
+		for(v = 0; v < n; v++) {
+			if( !cityCollected[v] && map[u][v] < INFINITY ) {
+				if( shortestDist[u] + map[u][v] < shortestDist[v]) {
+					shortestDist[v] = shortestDist[u] + map[u][v];
+					//printf("shortestDist[%d] was updated to %d\n", v, shortestDist[v]);
+					leastCost[v] = leastCost[u] + cost[u][v];
+				}
+				else if( shortestDist[u] + map[u][v] == shortestDist[v] ) {
+					
+					if( leastCost[u] + cost[u][v] < leastCost[v] ) leastCost[v] = leastCost[u] + cost[u][v];
+				}
+			}
+		}
+		
+	}
+		
+}
+
+int main() {
+	
+	int n, m;
+	Vertex s, d;
+	scanf("%d%d%d%d", &n, &m, &s, &d);
+	
+	readMap(n, m);
+	//printArr(leastCost, n);
+	//printMap(n);
+	
+	Dijkstra(n, s);
+	printf("%d %d\n", shortestDist[d], leastCost[d]);
+	
+	return 0;
+}
