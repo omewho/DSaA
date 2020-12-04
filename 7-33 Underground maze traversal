@@ -1,0 +1,184 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MaxVertexNum 1000
+
+typedef enum { false, true } bool;
+
+typedef int Vertex;
+
+typedef struct AdjVNode *PtrToAdjVNode; 
+struct AdjVNode {
+	Vertex AdjV;
+	PtrToAdjVNode Next;
+};
+
+typedef struct VertexNode{
+	PtrToAdjVNode FirstEdge; 
+} AdjList[MaxVertexNum];
+
+typedef struct GNode *PtrToGNode;
+struct GNode{
+	int Nv;
+	int Ne;
+	AdjList G;
+};
+typedef PtrToGNode LGraph;
+
+bool Visited[MaxVertexNum];
+
+Vertex stack[MaxVertexNum];
+int idx;
+
+void insertAdjVNode(PtrToAdjVNode *first, Vertex V) {
+	
+	PtrToAdjVNode pAdjVNode = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode)), previous, current;
+	pAdjVNode->AdjV = V;
+	pAdjVNode->Next = NULL;
+	
+	if( !(*first) ) *first = pAdjVNode;
+	else {
+		
+		if( (*first)->AdjV > V ) {
+			pAdjVNode->Next = *first;
+			*first = pAdjVNode;
+		}
+		else {  //V is greater than the first vertex on the list
+			
+			current = *first;
+			while(current && current->AdjV < V) {
+				previous = current;
+				current = current->Next;
+			}
+			
+			if( current ) {
+				pAdjVNode->Next = current;
+				previous->Next = pAdjVNode;	
+			}
+			
+			else {
+				previous->Next = pAdjVNode;
+			}
+			
+		}
+		
+	}
+}
+
+LGraph readMap(int n, int m) {
+	
+	LGraph Graph = (LGraph)malloc(sizeof(struct GNode));
+	Graph->Nv = n, Graph->Ne = m;
+	
+	
+	Vertex u, v;
+	for(u = 0; u < Graph->Nv; u++) {
+		Graph->G[u].FirstEdge = NULL;
+	}
+	
+	for(int i = 0; i < Graph->Ne; i++) {
+		scanf("%d%d", &u, &v);
+		u--, v--;
+		insertAdjVNode(&(Graph->G[u].FirstEdge), v);
+		insertAdjVNode(&(Graph->G[v].FirstEdge), u);
+	}
+	
+	return Graph;
+}
+
+void printAdjList(PtrToAdjVNode firstEdge) {
+	
+	while(firstEdge) {
+		printf(" %d", firstEdge->AdjV);
+		firstEdge = firstEdge->Next;
+	}
+	printf("\n");
+}
+
+void printLGraph(LGraph Graph) {
+	
+	Vertex V;
+	for(V = 0; V < Graph->Nv; V++) {
+		printf("%d:", V);
+		printAdjList(Graph->G[V].FirstEdge); 
+	}
+}
+
+//void DFS(LGraph Graph, Vertex V) {
+//	
+//	stack[idx++] = V;
+//	Visited[V] = true;
+//	
+//	PtrToAdjVNode pAdj = Graph->G[V].FirstEdge;
+//	while( pAdj ) {
+//		
+//		if( !Visited[pAdj->AdjV] ) DFS(Graph, pAdj->AdjV);
+//		pAdj = pAdj->Next; 
+//	}
+//}
+
+void nonRecursive_DFS(LGraph Graph, Vertex V) {
+	
+	stack[idx++] = V;
+	printf("%d", V + 1);
+	Visited[V] = true;
+	
+	Vertex U, W;
+	PtrToAdjVNode pAdj; 
+	
+	int count = 0;
+	while( idx > 0 && count <= 20 ) {
+		
+		W = stack[idx - 1];
+		//printf("W %d", W + 1);
+		
+		pAdj = Graph->G[W].FirstEdge;
+		
+		while(pAdj) {
+			
+			U = pAdj->AdjV;
+			//printf("U is %d. Is it visited? %d\n", U + 1, Visited[U]);
+			if( !Visited[U] ) {
+				printf(" %d", U + 1);
+				Visited[U] = true;
+				stack[idx++] = U;
+				break;
+			}
+			
+			pAdj = pAdj->Next;
+		}
+		
+		if( !pAdj) {
+			stack[idx--];
+			if(idx > 0) printf(" %d", stack[idx - 1] + 1);
+		}
+		
+	}
+}
+
+bool allVisited(int n) {
+	
+	bool res = true;
+	
+	for(int i = 0; i < n; i++) {
+		if(!Visited[i]) {
+			res = false;
+			break;
+		}
+	}
+	return res;
+}
+
+int main() {
+	
+	int n, m, s;
+	scanf("%d%d%d", &n, &m, &s);
+	
+	LGraph Graph = readMap(n, m);
+	//printLGraph(Graph);
+	nonRecursive_DFS(Graph, --s);
+	
+	if(!allVisited(n)) printf(" 0");
+	printf("\n");
+	
+	return 0;
+}
