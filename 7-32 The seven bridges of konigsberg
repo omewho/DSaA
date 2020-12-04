@@ -1,0 +1,90 @@
+#include <stdio.h>
+#define MAXN 1000
+
+const int INFINITY = 1e5;
+typedef int Vertex;
+typedef enum{ false, true } bool;
+
+int map[MAXN][MAXN], degree[MAXN];
+bool Visited[MAXN];
+
+void readMap(int *n) {
+	
+	int m;
+	scanf("%d%d", &(*n), &m);
+	
+	for(Vertex v = 0; v < *n; v++) {
+		for(Vertex w = 0; w < *n; w++) {
+			map[v][w] = false;
+		}
+	}
+	
+	Vertex u, v;
+	for(int i = 0; i < m; i++) {
+		scanf("%d%d", &u, &v);
+		u--, v--;
+		map[u][v] = map[v][u] = true;
+		degree[u]++;
+		degree[v]++;
+	}
+}
+
+void printArr(int *arr, int n) {
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+bool allEven(int n) {
+	
+	bool res = true;
+	for(Vertex v = 0; v < n; v++) {
+		if( degree[v] % 2 ) {
+			res = false;
+			break;
+		}
+	}
+	
+	return res;
+}
+
+void DFS(int n, Vertex S) {
+	
+	Visited[S] = true;
+	Vertex v;
+	for( v = 0; v < n; v++) {
+		
+		if( map[S][v] && !Visited[v]) DFS(n, v);
+	}	
+}
+
+int countComponents(int n) {
+	
+	int total = 0;
+	Vertex S;
+	for(S = 0; S < n; S++) {
+		if( !Visited[S]) {
+			DFS(n, S);
+			total++;
+		}	
+	}
+	
+	return total;
+}
+
+int main() {
+	
+	int n;
+	readMap( &n );
+	//printArr(degree, n);
+	
+	int total = countComponents(n);
+	//printf("total = %d\n", total);
+	bool res = true;
+	if(total != 1 || allEven(n) == false) res = false;
+	printf("%d\n", res);
+	
+	return 0;
+}
