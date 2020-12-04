@@ -1,0 +1,158 @@
+#include <stdio.h>
+#define MaxVertexNum 100
+
+const int INFINITY = 1e5;
+
+typedef enum{
+	false, true
+} bool;
+typedef int Vertex;
+typedef int WeightType;
+
+WeightType map[MaxVertexNum][MaxVertexNum], shortestDist[MaxVertexNum][MaxVertexNum];
+bool collected[MaxVertexNum][MaxVertexNum];
+
+void readMap(int Nv, int Ne) {
+	
+	Vertex u, v;
+	WeightType length;
+	for(u = 0; u < Nv; u++) {
+		for(v = 0; v < Nv; v++) {
+			map[u][v] = INFINITY;
+		}
+	}
+	
+	for(int i = 0; i < Ne; i++) {
+		scanf("%d%d%d", &u, &v, &length);
+		u--, v--;
+		map[u][v] = map[v][u] = length;
+	}
+}
+
+//void printArr(WeightType arr[][MaxVertexNum], int Nv) {
+//	
+//	Vertex u, v;
+//	for(u = 0; u < Nv; u++) {
+//		for(v = 0; v < Nv; v++) {
+//			if(v)printf(" ");
+//			printf("%d", arr[u][v]);
+//		}
+//		printf("\n");
+//	}
+//}
+
+void printArr(WeightType *arr, int Nv) {
+	
+	Vertex u, v;
+	for(u = 0; u < Nv; u++) {
+		for(v = 0; v < Nv; v++) {
+			if(v)printf(" ");
+			printf("%d", arr[u * MaxVertexNum + v]);
+		}
+		printf("\n");
+	}
+}
+
+//void printDist(WeightType *arr, int Nv){
+//	
+//	printf("shortest array is: ");
+//	for(int i = 0; i < Nv; i++) {
+//		printf(" %d", arr[i]);
+//	}
+//	printf("\n");
+//}
+
+void Dijkstra(Vertex i, int Nv) {
+	
+	Vertex u, v, w;
+	for(w = 0; w < Nv; w++) {
+		shortestDist[i][w] = INFINITY;
+	}
+	shortestDist[i][i] = 0;
+	//printDist(shortestDist[i], Nv);
+	
+	while(true) {
+		
+		u = -1;
+		WeightType MinDist = INFINITY;
+		for(w = 0; w < Nv; w++) {
+			if( !collected[i][w] && shortestDist[i][w] < MinDist) {
+				u = w;
+				MinDist = shortestDist[i][w];
+				//printf("Mindist is updated to %d.\n", MinDist);
+			}
+		}
+		if(u == -1) break;
+		
+		collected[i][u] = true;
+		
+		for(v = 0; v < Nv; v++) {
+			if (!collected[i][v] && map[u][v] < INFINITY) {
+				if(shortestDist[i][u] + map[u][v] < shortestDist[i][v]) {
+					shortestDist[i][v] = shortestDist[i][u] + map[u][v];
+					//printf("u is %d, v is %d, iv is now %d\n", u, v, shortestDist[i][v]);
+				}
+			}
+		}
+	}
+	//printf("Finished.\n");
+}
+
+void calculate(int Nv) {
+	for(int i = 0; i < Nv; i++) {
+		//printf("I am here.\n");
+		Dijkstra(i, Nv);
+	}
+}
+
+WeightType getithMax(Vertex i, int Nv) {
+	
+	WeightType max = 0;
+	for(Vertex v = 0; v < Nv; v++) {
+		if(v != i && shortestDist[i][v] > max) max = shortestDist[i][v];
+	}
+	return max;
+}
+
+void findAnimal(int Nv) {
+	
+	bool isPossible = true;
+	Vertex u, v, animal;
+	WeightType MinDist = INFINITY, ithMax;
+	for(u = 0; u < Nv; u++) {
+		
+		ithMax = getithMax(u, Nv);
+		if( ithMax == INFINITY ) {
+			isPossible = false;
+			break;
+		}
+		else if(ithMax < MinDist) {
+			MinDist = ithMax;
+			animal = u + 1;
+		}
+	}
+	
+	if(isPossible) {
+		printf("%d %d\n", animal, MinDist);
+	}
+	else printf("0\n");
+}
+
+
+
+int main() {
+	
+	int Nv, Ne;
+	scanf("%d%d", &Nv, &Ne);
+	
+	readMap(Nv, Ne);
+	//printArr((WeightType *)collected, Nv);
+	//Floyd(Nv);
+	calculate(Nv);
+	//printArr((WeightType *)shortestDist, Nv);
+	
+	findAnimal(Nv);
+	
+	
+	return 0;
+}
