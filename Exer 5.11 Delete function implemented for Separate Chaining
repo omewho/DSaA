@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define KEYLENGTH 15                   /* 关键词字符串的最大长度 */
+typedef char ElementType[KEYLENGTH+1]; /* 关键词类型用字符串 */
+typedef int Index;                     /* 散列地址类型 */
+typedef enum {false, true} bool;
+
+typedef struct LNode *PtrToLNode;
+struct LNode {
+    ElementType Data;
+    PtrToLNode Next;
+};
+typedef PtrToLNode Position;
+typedef PtrToLNode List;
+
+typedef struct TblNode *HashTable; /* 散列表类型 */
+struct TblNode {   /* 散列表结点定义 */
+    int TableSize; /* 表的最大长度 */
+    List Heads;    /* 指向链表头结点的数组 */
+};
+
+Index Hash( ElementType Key, int TableSize )
+{
+    return (Key[0]-'a')%TableSize;
+}
+
+HashTable BuildTable() {/* 裁判实现，细节不表 */
+	HashTable ht = (HashTable)malloc(sizeof(struct TblNode));
+	scanf("%d", &ht->TableSize);
+	
+	int n;
+	scanf("%d", &n);
+	
+	ht->Heads = (List)malloc(ht->TableSize * sizeof(struct LNode));
+	
+	for(int i = 0; i < ht->TableSize; i++) {
+		ht->Heads[i].Next = NULL;
+	}
+	
+	ElementType Key;
+	for(int i = 0; i < n; i++) {
+		scanf("%s", Key);
+		printf("%s\n", Key);
+		Index idx = Hash(Key, ht->TableSize);
+		
+		PtrToLNode pNode = (PtrToLNode)malloc(sizeof(struct LNode));
+		strcpy(pNode->Data, Key);
+		pNode->Next = ht->Heads[idx].Next;
+		ht->Heads[idx].Next = pNode;
+		//printf("asdf\n");
+	}
+	
+	return ht;
+}
+
+void printHT(HashTable H){
+	
+	Index idx;
+	for(idx = 0; idx < H->TableSize; idx++) {
+		
+		PtrToLNode pNode = H->Heads[idx].Next;
+		while(pNode) {
+			printf(" %s", pNode->Data);
+			pNode = pNode->Next;
+		}
+		printf("\n");
+	}
+}
+
+bool Delete( HashTable H, ElementType Key );
+
+int main() {
+    HashTable H;
+    ElementType Key;
+
+    H = BuildTable(); 
+    printHT(H);
+    
+    scanf("%s", Key);
+    if (Delete(H, Key) == false)
+        printf("ERROR: %s is not found\n", Key);
+    if (Delete(H, Key) == true)
+        printf("Are you kidding me?\n");
+    return 0;
+}
+
+bool Delete( HashTable H, ElementType Key ) {
+	
+	Index idx = Hash(Key, H->TableSize);
+	List current = H->Heads + idx, next;
+	
+	next = current->Next;
+	
+	while(next && strcmp(Key, next->Data)) {
+		
+		current = next;
+		next = next->Next;
+	}
+	
+	if( !next ) return false;
+	else {
+		
+		current->Next = next->Next;
+		free(next);
+		printf("%s is deleted from list Heads[%d]\n", Key, idx);
+		return true;
+	}
+	
+}
