@@ -1,0 +1,229 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#define MaxVertexNum 100
+
+const int INF = 1e5;
+
+typedef enum{false, true} bool;
+typedef int Vertex;
+typedef int WeightType;
+
+typedef struct coord{
+	int X, Y;
+}Point;
+
+int map[MaxVertexNum][MaxVertexNum];
+
+Point legalPoints[MaxVertexNum];
+
+bool isFirst_Croc[MaxVertexNum];
+int ifc_index = 0; 
+
+Vertex first_Crocs[MaxVertexNum], stack[MaxVertexNum];
+int legal_index = 0, fc_index = 0, s_index = 0;
+
+bool isLegit(Point p) {
+	
+	double dist = sqrt( p.X * p.X + p.Y * p.Y );
+	
+	if( dist > 15 * 1.0 / 2 && p.X < 50 && p.Y < 50) return true;
+	return false;
+}
+
+bool inRange(Point p1, Point p2, int longest) {
+	
+	return (p2.X - p1.X) * (p2.X - p1.X) + (p2.Y - p1.Y) * (p2.Y - p1.Y) <= longest * longest;
+}
+
+bool isFirst(Point p, int longest) {
+	return isLegit(p) && 4 * (p.X * p.X + p.Y * p.Y) <= (15 + 2 * longest) * (15 + 2 * longest);
+}
+
+void getInput(int n, int longest) {
+	
+	Point p;
+	for(int i = 0; i < n; i++) {
+		scanf("%d%d", &p.X, &p.Y);
+		if( isLegit(p)) {
+			legalPoints[legal_index++] = p;
+		}
+	}
+	
+	for(int i = 0; i < legal_index; i++) {
+		
+		if(isFirst(legalPoints[i], longest)) first_Crocs[fc_index++] = i;
+	}
+	
+}
+
+bool isLast(Point p, int longest) {
+	
+	return ( (p.X - 50) * (p.X - 50) <= longest * longest ) || ( (p.Y - 50) * (p.Y - 50) <= longest * longest ) \
+	|| ( (p.X + 50) * (p.X + 50) <= longest * longest ) || ( (p.Y + 50) * (p.Y + 50) <= longest * longest );
+}
+
+void readMap(int longest) {
+	
+	int Nv = legal_index + 1;
+	//printf("Nv is %d.\n", Nv);
+	
+	Vertex u, v;
+	for(u = 0; u < Nv; u++) {
+		for(v = 0; v < Nv; v++) {
+			map[u][v] = 0;
+		}
+	}
+	
+	for(u = 0; u < Nv - 1; u++) {
+		for(v = 0; v < Nv - 1; v++) {
+			if ( v != u  && inRange(legalPoints[u], legalPoints[v], longest)) map[u][v] = map[v][u] = 1;
+		}
+	}
+	
+	for(u = 0; u < Nv - 1; u++)	{
+		if( isLast(legalPoints[u], longest) ) map[u][Nv - 1] = map[Nv - 1][u] = 1;
+	}
+	
+}
+
+void printMap(int Nv) {
+	
+	Vertex u, v;
+	for(u = 0; u < Nv; u++) {
+		printf("%02d: ", u);
+		for(v = 0; v < Nv; v++) {
+			if(v) printf(" ");
+			printf("%d", map[u][v]);
+		}
+		printf("\n");
+	}
+}
+
+void printLast(int Nv, int longest) {
+	
+	for(int i = 0; i < Nv - 1; i++) {
+		if(  isLast(legalPoints[i], longest) ) printf("i: %d\n", i);
+	}
+}
+
+void printFirst(int Nv) {
+	
+	for(int i = 0; i < Nv; i++){
+		printf("%d: %d %d %d\n", i, first_Crocs[i], legalPoints[first_Crocs[i]].X, legalPoints[first_Crocs[i]].Y);
+	}
+}
+
+int comp(const void *v1, const void *v2) {
+	
+	Point p1 = legalPoints[*(Vertex *)v1], p2 = legalPoints[*(Vertex *)v2];
+	return ( p1.X * p1.X + p1.Y * p1.Y) - ( p2.X * p2.X + p2.Y * p2.Y);
+}
+
+void sortArr(Vertex *arr, int num) {
+	qsort(arr, num, sizeof(Vertex), comp);
+}
+
+void printbool(int *arr, int num) {
+	
+	for(int i = 0; i < num; i++) {
+		
+		printf(" %d", arr[i]);
+	}
+	printf("\n");
+}
+
+void stackPath(Vertex last, int *pre) {
+	
+	while(last != -1) {
+		stack[s_index++] = last;
+		last = pre[last];
+	}
+}
+
+void saveJames(int longest) {
+	
+	int Nv = legal_index + 1, num = fc_index;
+	
+	Point p;
+	p.X = 0; p.Y = 0;
+	
+	if( isLast(p, longest)) {
+		printf("1\n");
+		return;
+	}
+	
+	//bool isSaved = false;
+//	printMap(legal_index + 1);
+	sortArr(first_Crocs, num);
+//	printFirst(fc_index);
+	
+	Vertex Queue[MaxVertexNum];
+	int front = 0, rear = 0;
+	
+	int shortestDist[Nv], pre[Nv];
+	
+	Vertex u, v;
+	for(u = 0; u < Nv; u++) {
+		shortestDist[u] = -1;
+		pre[u] = -1;
+	}
+	
+	for(u = 0; u < num; u++) {
+		
+		shortestDist[first_Crocs[u]] = 1;
+		Queue[rear++] = first_Crocs[u];
+	}
+	
+	while(front != rear) {
+		
+		u = Queue[front++];
+
+		for(v = 0; v < Nv; v++) {
+			
+			if ( shortestDist[v] == -1 && map[u][v] == 1 ) {
+				
+				if( v == Nv - 1) {
+					printf("%d\n", shortestDist[u] + 1);
+					stackPath(u, pre);
+					
+					for(int i = s_index - 1; i >= 0; i--) {
+						printf("%d %d\n", legalPoints[stack[i]].X, legalPoints[stack[i]].Y);
+					}
+					return;
+				}
+				
+				shortestDist[v] = shortestDist[u] + 1;
+				//printf("v %d, v.x: %d, v.y: %d,  is added to the queue.\n", v, legalPoints[v].X, legalPoints[v].Y);
+				pre[v] = u;
+				Queue[rear++] = v;
+			}
+		}
+		
+	}
+	
+	printf("0\n");
+
+}
+
+
+int main() {
+	
+	int n, longest, Nv, Ne;
+	bool firstJump = true;
+	scanf("%d%d", &n, &longest);
+	
+	getInput(n, longest);
+	//printf("nv is %d\n", fc_index);
+	
+	if(!fc_index) firstJump = false;
+	if(firstJump) {
+		readMap(longest);
+		//printf("map115 is %d\n", map[1][15]);
+		saveJames(longest);
+	}
+	
+	else printf("0\n");
+	
+	return 0;
+}
