@@ -1,0 +1,67 @@
+#include <stdio.h> 
+#include <stdlib.h>
+#define MAXN 100000
+
+int arr[MAXN], Visited[MAXN], table[MAXN];
+typedef enum{false, true
+}bool;
+
+int comp(const void *pa, const void *pb) {
+	
+	int a = *(int *)pa, b = *(int *)pb;
+	return arr[a] - arr[b];
+}
+
+void printArr(int *arr, int n) {
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int calcuRings(int n) {
+	
+	int ttl = 0;
+	for(int i = 0; i < n; i++) {
+		if( !Visited[i]  && arr[i] != i) {
+			
+			int next = i, temp;
+			while(table[next] != next) {
+				temp = next;
+				next = table[next];
+				table[temp] = temp;
+				Visited[temp] = true;
+			}
+			ttl++;
+		}
+	}
+	return ttl;
+}
+
+int main() {
+	
+	int n;
+	scanf("%d", &n);
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &arr[i]);
+		table[arr[i]] = i;
+	}
+	
+	//qsort(table, n, sizeof(int), comp);
+	//printArr(table, n);
+	int S = 0, K, ttl;
+	
+	for(int i = 0; i < n; i++) {
+		if( table[i] == i ) S++;
+	}
+	
+	K = calcuRings(n);
+	if(arr[0] == 0) ttl = n - S + K;
+	else ttl = n - S + K - 2;
+	printf("%d\n", ttl);
+	
+	
+	return 0;
+}
