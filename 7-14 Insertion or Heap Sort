@@ -71,11 +71,11 @@ void percolateDown(int pos, int *medianArr, int heapsize) {
 		
 		if( child < heapsize && medianArr[child] < medianArr[ child + 1]) child++;
 		if(medianArr[child] > elem) medianArr[parent] = medianArr[child];
-		
+		else break;
 		parent = child;	
 	}
 	
-	medianArr[child] = elem;
+	medianArr[parent] = elem;
 	
 }
 
