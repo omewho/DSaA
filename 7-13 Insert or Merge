@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef enum{false, true}bool;
+
+int isInsertionSort(int *arr, int *medianArr, int n) {
+	
+	int sorted_num = 1, res = 0;
+	bool isSame = true;
+//	while( sorted_num < n ) {
+//		if( medianArr[sorted_num] < medianArr[sorted_num - 1] ) break;  // There is a likeliness that there are equal numbers
+//		sorted_num++;	
+//	}
+	
+	while( sorted_num < n  && medianArr[sorted_num] >= medianArr[sorted_num - 1]) sorted_num++;
+	//printf("Sorted num is %d.\n", sorted_num);
+	
+	int i = sorted_num;
+	for(; i < n; i++) {
+		if(arr[i] != medianArr[i]) {
+			isSame = false;
+			break;
+		}
+	}
+	
+	if(i == n) res = sorted_num;
+	return res;
+}
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+//int comp(const void *pa, const void *pb) {
+//	int a = *(int *)pa, b = *(int *)pb;
+//	return a - b;
+//}
+
+void nextInsertion(int *medianArr, int sorted_num, int n) {
+	
+	printf("Insertion Sort\n");
+	int i = sorted_num, temp = medianArr[i];
+	while( i > 0 && medianArr[i - 1] > temp) {
+		medianArr[i] = medianArr[i - 1];
+		i--;
+	}
+	medianArr[i] = temp;
+	
+	printArr(medianArr, n);
+}
+
+//void nextInsertion(int *medianArr, int sorted_num, int n) {
+//	
+//	printf("Insertion Sort\n");
+//	qsort(medianArr, sorted_num + 1, sizeof(int), comp);
+//	
+//	printArr(medianArr, n);
+//}
+
+int getMergeLength(int *medianArr, int n) {
+	
+	int length = 1;
+	
+	for(int len = 2; len <= n; len *= 2) {
+		//printf("i is %d.\n", len);
+		int i = 0, breakflag = 0;
+		while(i + len < n) {
+			//printf("pre is %d, median is %d, curr is %d, median is %d\n", i + len - 1, \
+			medianArr[i + len - 1], i + len, medianArr[i + len]);
+			if( medianArr[i + len - 1] > medianArr[i + len]){
+				//length = len;
+				breakflag = 1;
+				break;
+			} 
+			i += 2 * len;
+		}
+		length = len;
+		if(breakflag) break;
+	}
+	//printf("length is %d.\n", length);
+	return length;
+}
+
+void mergeArrs(int *list, int *sorted, int lStart, int rStart, int End) {
+	
+	//printf("length is sss %d.\n", rStart - lStart);
+	int p = lStart, q = rStart, r = lStart;
+	while(p < rStart && q < End + 1) {
+		if( list[p] < list[q] ) sorted[r++] = list[p++];
+		else sorted[r++] = list[q++];
+	}
+	
+	while(p < rStart) sorted[r++] = list[p++];
+	while(q < End + 1) sorted[r++] = list[q++];
+}
+
+void nextMerge(int *medianArr, int n) {
+	
+	printf("Merge Sort\n");
+	
+	int len = getMergeLength(medianArr, n);
+	
+	//printf("len is %d.\n", len);
+	
+	int *tempArray = (int *)malloc(sizeof(int) * n);
+	
+	int i;
+	for(i = 0; i <= n - 2 * len; i += 2 * len) {
+		
+		mergeArrs( medianArr, tempArray, i, i + len, i + 2 * len - 1 );
+	}
+	
+	if( i + len < n ) mergeArrs(medianArr, tempArray, i, i + len, n - 1);
+	else while(i < n) {
+		tempArray[i] = medianArr[i];
+		i++;
+	}
+	printArr(tempArray, n);
+	
+}
+
+int main() {
+	
+	int n;
+	scanf("%d", &n);
+	int arr[n], medianArr[n];
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &arr[i]);
+	}
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &medianArr[i]);
+	}
+	
+	int len = getMergeLength(medianArr, n);
+	int sorted_num = isInsertionSort(arr, medianArr, n);
+	if( sorted_num != 0 ) nextInsertion(medianArr, sorted_num, n);
+	else nextMerge(medianArr, n);
+	
+	return 0;
+}
