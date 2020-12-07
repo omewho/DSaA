@@ -1,0 +1,85 @@
+#include <stdio.h>
+
+#define ElementType int
+#define MAXN 100
+
+void merge_pass( ElementType list[], ElementType sorted[], int N, int length );
+
+void output( ElementType list[], int N )
+{
+    int i;
+    for (i=0; i<N; i++) printf("%d ", list[i]);
+    printf("\n");
+}
+
+void  merge_sort( ElementType list[],  int N )
+{
+    ElementType extra[MAXN];  /* the extra space required */
+    int  length = 1;  /* current length of sublist being merged */
+    while( length < N ) { 
+        merge_pass( list, extra, N, length ); /* merge list into extra */
+        output( extra, N );
+        length *= 2;
+        merge_pass( extra, list, N, length ); /* merge extra back to list */
+        output( list, N );
+        length *= 2;
+    }
+} 
+
+void printArr(int *arr, int start, int end) {
+	
+	for(int i = start; i <= end; i++) {
+		if(i != start) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+    int N, i;
+    ElementType A[MAXN];
+
+    scanf("%d", &N);
+    for (i=0; i<N; i++) scanf("%d", &A[i]);
+    merge_sort(A, N);
+    output(A, N);
+
+    return 0;
+}
+
+void mergeArr(ElementType list[], ElementType sorted[], int lStart, int rStart, int End) {
+	
+	int p = lStart, q = rStart, r = lStart;
+	//printf("p is %d, q is %d, r is %d, end is %d\n", p, q, r, End);
+	//printArr(list, lStart, End);
+	
+	while(p < rStart && q < End + 1) {
+		//printf("list[p] is %d, list[q] is %d\n", list[p], list[q]);
+		if( list[p] < list[q] ) {
+			sorted[r++] = list[p++];
+			//printf("sorted[%d] is updated to %d.\n", r - 1, sorted[r - 1]);
+		}
+		else {
+			sorted[r++] = list[q++];
+			//printf("Q, sorted[%d] is updated to %d.\n", r - 1, sorted[r - 1]);
+		}
+	}
+	
+	while( p < rStart ) sorted[r++] = list[p++];
+	while( q < End + 1 ) sorted[r++] = list[q++];
+}
+
+void merge_pass( ElementType list[], ElementType sorted[], int N, int length ) {
+	int i;
+	for( i = 0; i <= N - 2 * length; i += 2 * length) {
+		
+		mergeArr(list, sorted, i, i + length, i + 2 * length - 1);
+	}
+	
+	if( i + length < N  ) mergeArr(list, sorted, i, i + length, N - 1);
+	else while(i < N) {
+		sorted[i] = list[i];
+		i++;
+	}
+	
+}
