@@ -138,7 +138,6 @@ int main() {
 		scanf("%d", &medianArr[i]);
 	}
 	
-	int len = getMergeLength(medianArr, n);
 	int sorted_num = isInsertionSort(arr, medianArr, n);
 	if( sorted_num != 0 ) nextInsertion(medianArr, sorted_num, n);
 	else nextMerge(medianArr, n);
