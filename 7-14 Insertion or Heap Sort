@@ -1,0 +1,121 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef enum{false, true}bool;
+
+int isInsertionSort(int *arr, int *medianArr, int n) {
+	
+	int sorted_num = 1, res = 0;
+	bool isSame = true;
+//	while( sorted_num < n ) {
+//		if( medianArr[sorted_num] < medianArr[sorted_num - 1] ) break;  // There is a likeliness that there are equal numbers
+//		sorted_num++;	
+//	}
+	
+	while( sorted_num < n  && medianArr[sorted_num] >= medianArr[sorted_num - 1]) sorted_num++;
+	//printf("Sorted num is %d.\n", sorted_num);
+	
+	int i = sorted_num;
+	for(; i < n; i++) {
+		if(arr[i] != medianArr[i]) {
+			isSame = false;
+			break;
+		}
+	}
+	
+	if(i == n) res = sorted_num;
+	return res;
+}
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+//int comp(const void *pa, const void *pb) {
+//	int a = *(int *)pa, b = *(int *)pb;
+//	return a - b;
+//}
+
+void nextInsertion(int *medianArr, int sorted_num, int n) {
+	
+	printf("Insertion Sort\n");
+	int i = sorted_num, temp = medianArr[i];
+	while( i > 0 && medianArr[i - 1] > temp) {
+		medianArr[i] = medianArr[i - 1];
+		i--;
+	}
+	medianArr[i] = temp;
+	
+	printArr(medianArr, n);
+}
+
+//void nextInsertion(int *medianArr, int sorted_num, int n) {
+//	
+//	printf("Insertion Sort\n");
+//	qsort(medianArr, sorted_num + 1, sizeof(int), comp);
+//	
+//	printArr(medianArr, n);
+//}
+
+void percolateDown(int pos, int *medianArr, int heapsize) {
+	int parent = pos, child;
+	
+	int elem = medianArr[parent];
+	while(parent * 2 + 1 <= heapsize) {
+		child = 2 * parent + 1;
+		
+		if( child < heapsize && medianArr[child] < medianArr[ child + 1]) child++;
+		if(medianArr[child] > elem) medianArr[parent] = medianArr[child];
+		
+		parent = child;	
+	}
+	
+	medianArr[child] = elem;
+	
+}
+
+void nextHeapSort(int *medianArr, int n) {
+	
+	printf("Heap Sort\n");
+	
+	int i, temp, heapsize;
+	
+	for( i = n - 1; i >= 0 && medianArr[i] > medianArr[0]; i--) ;
+	temp = medianArr[i];
+	medianArr[i] = medianArr[0];
+	medianArr[0] = temp;
+	
+	heapsize = i - 1;
+	percolateDown(0, medianArr, heapsize);
+	
+	//printf("%d \n", i);
+	
+	printArr(medianArr, n);
+	
+}
+
+int main() {
+	
+	int n;
+	scanf("%d", &n);
+	int arr[n], medianArr[n];
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &arr[i]);
+	}
+	
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &medianArr[i]);
+	}
+	
+	int sorted_num = isInsertionSort(arr, medianArr, n);
+	if( sorted_num != 0 ) nextInsertion(medianArr, sorted_num, n);
+	else nextHeapSort(medianArr, n);
+	
+	return 0;
+}
