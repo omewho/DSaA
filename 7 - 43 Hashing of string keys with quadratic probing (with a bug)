@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAXS 8
+#define MAXD 5
+#define MAXB 3
+#define MASK ( (1 << (MAXB * MAXD)) - 1 )
+
+typedef char ElementType[MAXS + 1];
+typedef enum{false, true} bool;
+typedef enum{Occupied, Empty} Status;
+
+typedef struct CNode *PtrToCell;
+struct CNode{
+	ElementType Element;
+	Status Info;
+};
+
+typedef struct HT *HashTable;
+struct HT{
+	int TableSize;
+	PtrToCell Cells; 
+};
+
+int Hash(ElementType Key, int TableSize) {
+	
+	int h = 0;
+	char *pchar = Key;
+	
+	while( *pchar != '\0') {
+		
+		h = ( h << MAXD ) + *pchar - 'A';
+		pchar++;
+	}
+	
+	return (h & MASK) % TableSize;
+}
+
+int Hash1(ElementType Key, int TableSize) {
+	
+	int len = 0;
+	char *pchar = Key;
+	
+	while( *pchar != '\0') {
+		
+		len++;
+		pchar++;
+	}
+	int hash = 0, count = 0;
+	
+	//printf("hash is %d.\n", hash);
+	while( len > 0 && count < 3) {
+		count++;
+        len--;
+        pchar--;
+		hash = hash * 32 + *pchar - 'A';
+	}
+	
+//     if(len == 1) hash = Key[len - 1] - 'A';
+// 	else if(len == 2) hash = 32 * (Key[0] - 'A') + Key[1] - 'A';
+// 	else hash = 32 * 32 * (Key[len - 3] - 'A') + 32 * (Key[len - 2] - 'A') + Key[len - 1] - 'A';
+    
+	return hash % TableSize;
+}
+
+HashTable initializeHT(int p) {
+	
+	HashTable ht = (HashTable)malloc(sizeof(struct HT));
+	ht->TableSize = p;
+	ht->Cells = (PtrToCell)malloc(ht->TableSize * sizeof(struct CNode));
+	
+	for(int i = 0; i < p; i++) ht->Cells[i].Info = Empty;
+		
+	return ht;
+}
+
+int findPos(ElementType Key, HashTable ht) {
+	int increment, conflict_num = 0;
+	int newPos, assumedPos;
+	
+	newPos = assumedPos = Hash1(Key, ht->TableSize);
+	while( ht->Cells[assumedPos].Info != Empty && strcmp( ht->Cells[assumedPos].Element, Key ) ) {
+		
+		if( ++conflict_num % 2 ) {
+			increment = ( (conflict_num + 1) / 2 ) * ( (conflict_num + 1) / 2 );
+			
+		}
+		else increment = - ( conflict_num / 2 ) * ( conflict_num / 2 ) ;
+		
+		assumedPos = newPos + increment;
+		
+		while(assumedPos < 0) assumedPos += ht->TableSize;
+		while(assumedPos >= ht->TableSize) assumedPos -= ht->TableSize;
+			
+	}
+	return assumedPos;
+}
+
+void insertAndisplay(ElementType Key, HashTable ht) {
+	
+	int pos = findPos(Key, ht);
+	
+	if ( ht->Cells[pos].Info == Empty ) {
+		
+		ht->Cells[pos].Info = Occupied;
+		strcpy( ht->Cells[pos].Element, Key );
+	}
+	printf("%d", pos);
+}
+
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+	
+	int n, p;
+	scanf("%d%d\n", &n, &p);
+	
+	HashTable ht = initializeHT(p);
+	
+	ElementType Key;
+	for(int i = 0; i < n; i++) {
+		scanf("%s", Key);
+		//printf("Key is: %s.\n", Key);
+		if(i) printf(" ");
+		insertAndisplay(Key, ht);
+	}
+	
+	printf("\n");
+	
+	return 0;
+}
