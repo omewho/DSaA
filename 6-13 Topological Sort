@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef enum {false, true} bool;
+#define MaxVertexNum 10  /* maximum number of vertices */
+typedef int Vertex;      /* vertices are numbered from 0 to MaxVertexNum-1 */
+
+typedef struct AdjVNode *PtrToAdjVNode; 
+struct AdjVNode{
+    Vertex AdjV;
+    PtrToAdjVNode Next;
+};
+
+typedef struct Vnode{
+    PtrToAdjVNode FirstEdge;
+} AdjList[MaxVertexNum];
+
+typedef struct GNode *PtrToGNode;
+struct GNode{  
+    int Nv;
+    int Ne;
+    AdjList G;
+};
+typedef PtrToGNode LGraph;
+
+LGraph ReadG() {/* details omitted */
+
+	LGraph Graph = (LGraph)malloc(sizeof(struct GNode));
+	scanf("%d%d", &Graph->Nv, &Graph->Ne);
+	printf("%d %d\n", Graph->Nv, Graph->Ne);
+	//Graph->G = 
+	
+	Vertex u, v;
+	for(int i = 0; i < Graph->Ne; i++) Graph->G[i].FirstEdge = NULL;
+	
+	for(int i = 0; i < Graph->Ne; i++) {
+		scanf("%d%d", &u, &v);
+		PtrToAdjVNode pAdj = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode));
+		pAdj->AdjV = v;
+		pAdj->Next = Graph->G[u].FirstEdge;
+		Graph->G[u].FirstEdge = pAdj;
+	}
+	return Graph; // Do not forget to return this.
+}
+
+bool TopSort( LGraph Graph, Vertex TopOrder[] );
+
+int main()
+{
+    int i;
+    Vertex TopOrder[MaxVertexNum];
+    LGraph G = ReadG();
+
+    if ( TopSort(G, TopOrder)==true )
+        for ( i=0; i<G->Nv; i++ )
+            printf("%d ", TopOrder[i]);
+    else
+        printf("ERROR");
+    printf("\n");
+
+    return 0;
+}
+
+bool TopSort( LGraph Graph, Vertex TopOrder[] ) {
+	
+	int indegree[Graph->Nv], idx = 0;
+	
+	for(int i = 0; i < Graph->Nv; i++) indegree[i] = 0;
+	
+	for(int i = 0; i < Graph->Nv; i++) {
+		
+		PtrToAdjVNode pAdj = Graph->G[i].FirstEdge;
+		Vertex v;
+		while(pAdj) {
+			v = pAdj->AdjV;
+			indegree[v]++;
+			pAdj = pAdj->Next;
+		}	
+	}
+	
+	Vertex Queue[Graph->Nv];
+	int front = 0, rear = 0;
+	for(int i = 0; i < Graph->Nv; i++) {
+		if( indegree[i] == 0 ) Queue[rear++] = i;
+	}
+	
+	while( front != rear) {
+		Vertex w = Queue[front++];
+		TopOrder[idx++] = w;
+		
+		PtrToAdjVNode pAdj = Graph->G[w].FirstEdge;
+		while( pAdj )  {
+			Vertex x = pAdj->AdjV;
+			indegree[x]--;
+			if(!indegree[x]) Queue[rear++] = x;
+			
+			pAdj = pAdj->Next;
+		}	
+	}
+	
+	if(idx != Graph->Nv ) return false;
+	else return true;
+	
+	
+}
