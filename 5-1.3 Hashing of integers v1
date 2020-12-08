@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAXN 2000
+
+typedef int ElementType;
+typedef enum{false, true}bool;
+typedef enum{Occupied, Empty} Status;
+
+typedef struct CNode *PtrToCell;
+struct CNode{
+	ElementType Element;
+	Status Info;
+};
+
+typedef struct HashTbl *HashTable;
+struct HashTbl{
+	int TableSize;
+	PtrToCell Cells;
+};
+
+
+int Hash(ElementType Key, int TableSize) {
+	
+	return Key % TableSize;
+}
+
+HashTable initializeHT(int TblSize) {
+	
+	HashTable ht = (HashTable)malloc(sizeof(struct HashTbl));
+	ht->TableSize = TblSize;
+	ht->Cells = (PtrToCell)malloc( ht->TableSize * sizeof(struct CNode));
+	
+	for(int i = 0; i < TblSize; i++) {
+		ht->Cells[i].Info = Empty;
+	}
+	//printf("Finished.\n");
+	return ht;
+}
+
+int find(ElementType Key, HashTable ht) {
+	
+	int pos = Hash(Key, ht->TableSize);
+	while( ht->Cells[pos].Info != Empty && ht->Cells[pos].Element != Key) {
+		
+		pos++;
+		if(pos == ht->TableSize) pos -= ht->TableSize;
+	}
+	//printf("pos is %d\n", pos);
+	return pos;
+}
+
+void insertAndisplay(ElementType Key, HashTable ht) {
+	
+	int pos = find(Key, ht);
+	
+	if(ht->Cells[pos].Info ==  Empty) {
+		
+		ht->Cells[pos].Element = Key;
+		ht->Cells[pos].Info = Occupied;
+	}
+	printf("%d", pos);
+	
+}
+
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+	
+	int n, p;
+	scanf("%d%d", &n, &p);
+	HashTable ht = initializeHT(p);
+	
+	int num;
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &num);
+		if(i) printf(" ");
+		insertAndisplay(num, ht);
+	}
+	
+	printf("\n");
+	
+	return 0;
+}
