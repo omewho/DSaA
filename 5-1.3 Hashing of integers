@@ -1,0 +1,68 @@
+#include <stdio.h>
+#define MAXN 2000
+
+typedef int ElementType;
+typedef enum{false, true}bool;
+
+int Hash(ElementType Key, int TableSize) {
+	
+	return Key % TableSize;
+}
+
+bool occupied[MAXN];
+
+int numtoAddr[MAXN];
+
+void initialize(int n) {
+	
+	for(int i = 0; i < n; i++) {
+		numtoAddr[i] = -1;
+	}
+}
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+	
+	int n, p;
+	scanf("%d%d", &n, &p);
+	
+	initialize(MAXN);
+	//printArr(numtoAddr, p);
+	
+	int num;
+	for(int i = 0; i < n; i++) {
+		
+		scanf("%d", &num);
+		//printf("%d, addr[%d] is %d\n", num, num, numtoAddr[num]);
+		int pos = -1, assumed_pos = Hash(num, p);
+		
+		if( numtoAddr[num] < 0 ) {
+			
+			while( occupied[assumed_pos] ) {
+				
+//				assumed_pos++;			
+//				if(assumed_pos == p) assumed_pos -= p;
+				assumed_pos = (assumed_pos + 1) % p;
+
+			}
+			numtoAddr[num] = assumed_pos;
+			pos = assumed_pos;
+			occupied[pos] = true;
+		}
+		else pos = numtoAddr[num];
+		
+		if( i ) printf(" ");
+		printf("%d", pos);
+	}
+	printf("\n");
+	
+	return 0;
+}
