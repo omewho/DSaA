@@ -1,0 +1,151 @@
+#include <stdio.h>
+#define MaxVertexNum 100
+#define INF 65535
+
+typedef enum{false, true}bool;
+
+int map[MaxVertexNum][MaxVertexNum], delay[MaxVertexNum][MaxVertexNum], inDegree[MaxVertexNum], \
+outDegree[MaxVertexNum], earliest[MaxVertexNum], latest[MaxVertexNum];    //, delay[MaxVertexNum];
+
+int topOrder[MaxVertexNum];
+
+
+void readG(int Nv, int Ne) {
+	
+	for(int i = 0; i < Nv; i++) {
+		for(int j = 0; j < Nv; j++) {
+			map[i][j] = INF;
+			//reversedMap[i][j] = INF;
+		}
+	}
+	
+	int u, v, time;
+	for(int i = 0; i < Ne; i++) {
+		scanf("%d%d%d", &u, &v, &time);
+		u--, v--;
+		map[u][v] = time;
+		//reversedMap[v][u] = time;
+		inDegree[v]++;
+		outDegree[u]++;
+	}
+}
+
+int topological_sort(int Nv) {
+	
+	int Queue[Nv], front = 0, rear = 0;
+	
+	for(int i = 0; i < Nv; i++) {
+		if( !inDegree[i] ) Queue[rear++] = i;
+	}
+	
+	//int count = 0;
+	while( front != rear) {
+		int u = Queue[front++], v;
+		topOrder[front - 1] = u;
+		for(v = 0; v < Nv; v++) {
+			
+			if(map[u][v] < INF ) {
+				
+				if(earliest[u] + map[u][v] > earliest[v]) earliest[v] = earliest[u] + map[u][v];
+				
+				inDegree[v]--;
+				if( !inDegree[v] ) Queue[rear++] = v;
+				
+			}
+		}
+		
+	}
+	
+	int max = 0;
+	if(front != Nv) printf("0\n");
+	else {
+		
+		for(int i = 0; i < Nv; i++) {
+			if( earliest[i] > max ) max = earliest[i];
+		}
+		printf("%d\n", max);
+	}
+	
+	return max;	
+}
+
+void initializeLatest(int Nv) {
+	for(int i = 0; i < Nv; i++) {
+		latest[i] = INF;
+		for(int j = 0; j < Nv; j++) {
+			delay[i][j] = INF;
+		}
+	}
+}
+
+void reversedTopSort(int Nv, int maxlen) {
+	
+	int Queue[MaxVertexNum];
+	int front = 0, rear = 0;
+	
+	initializeLatest(Nv);
+	
+	for(int i = Nv - 1; i >= 0; i--) {
+		if( !outDegree[i] ) {
+			Queue[rear++] = i;
+			latest[i] = maxlen;
+		}
+	}
+	
+	while( front != rear ) {
+		int u, v;
+		u = Queue[front++];
+		for(int i = 0; i < Nv; i++) {
+			
+			if(map[i][u] < INF) {
+				outDegree[i]--;
+				if( !outDegree[i] ) Queue[rear++] = i;
+				if(latest[i] >= latest[u] - map[i][u]) {
+					latest[i] = latest[u] - map[i][u];
+					delay[i][u] = latest[u]	- earliest[i] - map[i][u];				
+				}
+			}
+		}
+		
+	}	
+}
+
+void printCriticalPath(int Nv) {
+	
+	for(int i = 0; i < Nv; i++) {
+		
+		for(int j = Nv - 1; j >= 0; j--) {
+			
+			if(!delay[i][j]) printf("%d->%d\n", i + 1, j + 1);
+		}
+	}
+}
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int main() {
+	
+	int Nv, Ne;
+	scanf("%d%d", &Nv, &Ne);
+	
+	readG(Nv, Ne);
+	int maxlen = topological_sort(Nv);
+	
+	//printArr(earliest, Nv);
+	//printArr(topOrder, Nv);
+	
+	if( maxlen ) {
+		reversedTopSort(Nv, maxlen);
+		printCriticalPath( Nv );	
+	}
+	
+	return 0;
+}
