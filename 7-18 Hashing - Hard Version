@@ -1,0 +1,315 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MaxVertexNum 1000
+#define INFINITY 65535
+const int MINDATA = -1;
+
+typedef enum{false, true}bool;
+
+void printArr(int *arr, int n) {
+	
+	for(int i = 0; i < n; i++) {
+		
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+/*        Definition and Operations of HashTable        */
+typedef enum{Occupied, Empty} Status;
+typedef int HashElementType;
+typedef int Index;
+
+typedef struct HashEntry CellType;
+struct HashEntry{
+	HashElementType Data;
+	Status Info;
+};
+
+typedef struct HashTbl * HashTable;
+struct HashTbl {
+	int TableSize;
+	CellType *Cells;
+};
+
+HashTable createHashTable(int TableSize) {
+	
+	HashTable ht = (HashTable)malloc(sizeof(struct HashTbl));
+	ht->TableSize = TableSize;
+	ht->Cells = (CellType *)malloc( ht->TableSize * sizeof( CellType ));
+	
+	for(int i = 0; i < ht->TableSize; i++) {
+		ht->Cells[i].Info = Empty;
+	}
+	
+	return ht;
+}
+
+HashTable fillHashTable(int num) {
+	
+	HashTable ht = createHashTable(num);
+	
+	int data, ttl = 0;
+	for(int i = 0; i < num; i++) {
+		scanf("%d", &data);
+		ht->Cells[i].Data = data;
+		if( !(data < 0) ) {
+			
+			ttl++;
+			ht->Cells[i].Info = Occupied;
+		}
+		else {
+			
+			ht->Cells[i].Info = Empty;	
+		}
+	}
+	
+	return ht;
+}
+
+/*-------End of HashTable---------*/
+
+
+/*   Definition of MinHeap  */
+typedef int Vertex;
+
+typedef struct{
+	int VertexNum;
+	int Data;
+} HeapElementType;
+typedef struct HeapNode *PtrToHeap;
+struct HeapNode{
+	int Capacity;
+	int CurSize;
+	HeapElementType *Data;
+};
+
+typedef PtrToHeap MinHeap;
+
+MinHeap createMinHeap(int Capacity) {
+	
+	MinHeap mh = (MinHeap)malloc(sizeof(struct HeapNode));
+	mh->Capacity = Capacity;
+	mh->CurSize = 0;
+	mh->Data = (HeapElementType *)malloc( ( mh->Capacity + 1) * sizeof(HeapElementType) );
+	
+	HeapElementType hElem;
+	hElem.Data = -1;
+	mh->Data[0] = hElem;
+	
+	return mh;
+}
+
+
+
+void percolateUp(int pos, MinHeap mh) {
+	
+	HeapElementType hElem = mh->Data[pos];
+	//printf("v is %d.\n", hElem.Data);
+	
+	int child = pos, parent = pos / 2;
+	
+	while( mh->Data[parent].Data > hElem.Data ) {
+		
+		mh->Data[child] = mh->Data[parent];
+		child = parent;
+		parent /= 2;
+	}
+	
+	mh->Data[child] = hElem;
+	
+}
+
+void percolateDown(int pos, MinHeap mh) {
+	
+	HeapElementType elem = mh->Data[pos];
+	int parent = pos, child;
+	
+	while( 2 * parent <= mh->CurSize ) {
+		child = 2 * parent;
+		if( child != mh->CurSize && mh->Data[child].Data > mh->Data[child + 1].Data ) child++;
+		
+		if( mh->Data[child].Data < elem.Data ) mh->Data[parent] = mh->Data[child];
+		else break;
+		
+		parent = child;
+	}
+	mh->Data[parent] = elem;
+	
+}
+
+
+void insertToMinHeap(HeapElementType heapElem, MinHeap mh) {
+	
+	mh->Data[++mh->CurSize] = heapElem;
+	//printf("mh->Data[%d] has been inserted, %d.\n", mh->CurSize, mh->Data[mh->CurSize]);
+	percolateUp(mh->CurSize, mh);
+}
+
+HeapElementType deletefrMinHeap(MinHeap mh) {
+	
+	HeapElementType hElem = mh->Data[1];
+	
+	mh->Data[1] = mh->Data[mh->CurSize--];
+	
+	percolateDown(1, mh);
+	
+	return hElem;
+}
+
+
+
+
+
+void printHeap(MinHeap mh) {
+	
+	for(int i = 1; i < mh->CurSize + 1; i++) {
+		if(i) printf(" ");
+		printf("%d", mh->Data[i].Data);
+	}
+	printf("\n"); 
+	
+	for(int i = 1; i < mh->CurSize + 1; i++) {
+		if(i) printf(" ");
+		printf("%d", mh->Data[i].VertexNum);
+	}
+	printf("\n");
+}
+
+/*--------Operations of MinHeap-----------*/
+
+
+/*  Definition of Graph  */
+typedef int Vertex;
+
+typedef struct GraphNode *MGraph;
+struct GraphNode{
+	int Nv, Ne;
+	int **G;
+	int *inDegree;
+};
+
+MGraph createGraph(int Nv) {
+	
+	MGraph Graph = (MGraph)malloc(sizeof(struct GraphNode));
+	Graph->Nv = Nv;
+	Graph->Ne = 0;
+	Graph->G = (int **)malloc(sizeof(int *) * Graph->Nv);
+	Graph->inDegree = (int *)malloc(Graph->Nv * sizeof(int));
+	
+	for(int i = 0; i < Graph->Nv; i++) {
+		Graph->G[i] = (int *)malloc(Graph->Nv * sizeof(int));
+		Graph->inDegree[i] = 0;
+	}
+	
+	Vertex u, v;
+	for(u = 0; u < Graph->Nv; u++) {
+		for(v = 0; v < Graph->Nv; v++) {
+			Graph->G[u][v] = INFINITY;
+		}
+	}
+	//printf("finished.\n");
+	return Graph;
+}
+
+Index Hash(HashElementType Key, int TableSize) {
+	
+	return Key % TableSize;
+}
+
+void readGraph(HashTable ht, MGraph Graph) {
+	
+	//printf("reading...\n");
+	HashElementType curdata, predata;
+	Index assumed_pos, pos;
+	for( pos = 0; pos < ht->TableSize; pos++) {
+		
+		if(ht->Cells[pos].Info != Empty) {
+			assumed_pos = Hash(ht->Cells[pos].Data, ht->TableSize);
+			curdata = ht->Cells[pos].Data;
+			//printf("%d curdata.\n", curdata);
+			
+			if(assumed_pos != pos) {
+				while(ht->Cells[assumed_pos].Info == Occupied && ht->Cells[assumed_pos].Data != curdata) {
+					//printf("%d %d\n", assumed_pos, ht->Cells[assumed_pos]);
+					Graph->G[assumed_pos][pos] = 1;
+					Graph->inDegree[pos]++;
+					//printf("ass %d pos is %d.\n", assumed_pos, pos);
+					assumed_pos = (assumed_pos + 1) % ht->TableSize;
+				}
+			}				
+		}
+		
+		else Graph->inDegree[pos] = ht->Cells[pos].Data;	
+	}
+	
+}
+
+void topological_Sort(MGraph Graph, HashTable ht) {
+	
+	MinHeap mh = createMinHeap(ht->TableSize);
+	
+	int count = 0;
+	
+	for(int i = 0; i < Graph->Nv; i++) {
+		
+		if( !Graph->inDegree[i] ) {
+			
+			HeapElementType hElem;
+			hElem.VertexNum = i;
+			hElem.Data = ht->Cells[i].Data;
+			//printf("VertexNum is %d, vdata is %d.\n", hElem.VertexNum, hElem.Data);
+			insertToMinHeap(hElem, mh);
+		}
+	}
+	
+//	printf("\n");
+//	printHeap(mh);
+	
+	while( mh->CurSize ) {
+		
+		HeapElementType hElem = deletefrMinHeap(mh);
+		//printHeap(mh);
+		Vertex u = hElem.VertexNum;
+		if(count) printf(" ");
+		printf("%d", hElem.Data);
+		count++;
+		
+		for(Vertex v = 0; v < Graph->Nv; v++) {
+			if( Graph->G[u][v] < INFINITY ) {
+				if(--Graph->inDegree[v] == 0) {
+					
+					HeapElementType heapelem;
+					heapelem.Data = ht->Cells[v].Data;
+					heapelem.VertexNum = v;
+					insertToMinHeap(heapelem, mh);
+					//printHeap(mh);
+				}
+				
+			}
+		}
+		
+	}
+	printf("\n");
+	
+}
+/*                   */
+
+
+int main() {
+	
+	int N;
+	scanf("%d", &N);
+	
+	HashTable ht = fillHashTable(N);
+	//printf("legal is %d\n", legalNums);
+	
+	MGraph Graph = createGraph(N);
+	readGraph(ht, Graph);
+	//printArr(Graph->inDegree, N);
+	
+	topological_Sort(Graph, ht);
+	
+	return 0;
+}
