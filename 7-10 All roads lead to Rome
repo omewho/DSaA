@@ -1,0 +1,239 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MaxVertexNum 1000  /* maximum number of vertices */
+
+typedef enum {false, true} bool;
+typedef int Vertex;      
+
+int parent[MaxVertexNum];
+
+typedef struct AdjVNode *PtrToAdjVNode;
+struct AdjVNode{
+	Vertex AdjVertex;
+	PtrToAdjVNode Next;
+}; 
+
+typedef struct AdjLNode *AdjList;
+struct AdjLNode{
+	PtrToAdjVNode FirstEdge;
+};
+
+typedef struct GNode *LGraph;
+struct GNode {
+	int Nv, Ne;
+	AdjList G;
+};
+
+typedef struct EdgeNode *PtrToEdgeNode;
+typedef int WeightType;
+struct EdgeNode {
+	Vertex V1, V2;
+	WeightType Weight;
+};
+
+typedef struct EdgeNode HeapElementType;
+
+typedef struct HeapNode *MinHeap;
+struct HeapNode{
+	int Capacity;
+	int CurSize;
+	HeapElementType * Data;
+};
+
+MinHeap createMinHeap(int Capacity) {
+	MinHeap mh = (MinHeap)malloc( sizeof(struct HeapNode));
+	mh->Capacity = Capacity;
+	mh->CurSize = 0;
+	mh->Data = (HeapElementType *)malloc( (mh->Capacity + 1) * sizeof(HeapElementType) );
+	
+	HeapElementType hElem;
+	hElem.Weight = -1;
+	
+	mh->Data[0] = hElem;
+	
+	return mh;
+}
+
+void percolateUp(int pos, MinHeap mh) {
+	
+	HeapElementType hElem = mh->Data[pos];
+	int parent = pos / 2, child = pos;
+	
+	while( mh->Data[parent].Weight > hElem.Weight ) {
+		
+		mh->Data[child] = mh->Data[parent];
+		child = parent;
+		parent /= 2;
+	}
+	mh->Data[child] = hElem;
+}
+
+void insertHeapElem(HeapElementType hElem, MinHeap mh) {
+	
+	mh->Data[++mh->CurSize] = hElem;
+	percolateUp(mh->CurSize, mh);
+	
+}
+
+void percolateDown(int pos, MinHeap mh) {
+	
+	HeapElementType hElem = mh->Data[pos];
+	
+	int parent = pos, child;
+	while( 2 * parent <= mh->CurSize ) {
+		
+		child = 2 * parent;
+		if(child != mh->CurSize && mh->Data[child].Weight > mh->Data[child + 1].Weight ) child++;
+		
+		if( mh->Data[child].Weight < hElem.Weight ) mh->Data[parent] = mh->Data[child];
+		else break;	
+		parent = child;
+	}
+	mh->Data[parent] = hElem;
+}
+
+HeapElementType deleteHElement(MinHeap mh) {
+	
+	if(mh->CurSize == 0) return mh->Data[0];
+	else {
+		HeapElementType hElem = mh->Data[1];
+		mh->Data[1] = mh->Data[mh->CurSize--];
+		percolateDown(1, mh);	
+		return hElem;	
+	}
+	
+}
+
+
+LGraph readGraph(int Nv, int Ne, MinHeap mh) {
+	
+	LGraph Graph = (LGraph)malloc(sizeof(struct GNode));
+	Graph->Nv = Nv;
+	Graph->Ne = Ne;
+	Graph->G = (AdjList)malloc( Graph->Nv * sizeof(struct AdjLNode));
+	
+	for(Vertex i = 0; i < Graph->Nv; i++) {
+		Graph->G[i].FirstEdge = NULL;
+	}
+	
+	Vertex u, v;
+	WeightType weight;
+	for(int i = 0; i < Graph->Ne; i++) {
+		scanf("%d%d%d", &u, &v, &weight);
+		
+		struct EdgeNode Edge;
+		Edge.V1 = u - 1;
+		Edge.V2 = v - 1;
+		Edge.Weight = weight;
+		insertHeapElem(Edge, mh);
+		
+		PtrToAdjVNode pAdjv = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode));
+		pAdjv->AdjVertex = v - 1;
+		pAdjv->Next = Graph->G[u].FirstEdge;
+		Graph->G[u].FirstEdge =  pAdjv;
+		
+		PtrToAdjVNode pAdju = (PtrToAdjVNode)malloc(sizeof(struct AdjVNode));
+		pAdju->AdjVertex = u - 1;
+		pAdju->Next = Graph->G[v].FirstEdge;
+		Graph->G[v].FirstEdge =  pAdju;
+	}
+	
+	return Graph;
+}
+
+void printHeap(MinHeap mh) {
+	
+	for(int i = 0; i < mh->CurSize + 1; i++) {
+		//if(i)printf(" ");
+		printf("idx%02d: v1:%d, v2:%d, weight: %d\n", i, mh->Data[i].V1, mh->Data[i].V2, mh->Data[i].Weight);
+	}
+	printf("\n");
+}
+
+void initParent(int n) {
+	
+	for(int i = 0; i < n; i++) {
+		parent[i] = -1;
+	}
+}
+
+int findParent(Vertex vNum) {
+	
+	Vertex v = vNum;
+	while(parent[vNum] >= 0) vNum = parent[vNum];
+	
+	while ( parent[v] >= 0 ) {
+		
+		Vertex u = parent[v];
+		parent[v] = vNum;
+		v = u;	
+	}
+	
+	return vNum;
+}
+
+void unionVertex(Vertex rootu, Vertex rootv) { // parent[u] != parent[v]
+	
+	if(parent[rootu] < parent[rootv]) { // set u is larger
+		
+		parent[rootu] += parent[rootv];
+		parent[rootv] = rootu;
+	}
+	else {
+		parent[rootv] += parent[rootu];
+		parent[rootu] = rootv;
+	}
+}
+
+
+int Kruskal(MinHeap mh, LGraph Graph) {
+	
+	int weight_sum = 0, edge_num = 0;
+	initParent(Graph->Nv);
+	
+	while( edge_num < Graph->Nv - 1){
+		
+		HeapElementType edge = deleteHElement(mh);
+//		printf("Heap:\n");
+//		printHeap(mh);
+		
+		if( edge.Weight == -1) break;
+		
+		Vertex root1 = findParent(edge.V1), root2 = findParent(edge.V2);
+		
+		if(root1 != root2) {
+			//printf("root1 is %d, root2 is %d, weight is %d.\n", root1, root2, edge.Weight);
+			weight_sum += edge.Weight;
+			unionVertex(root1, root2);
+			edge_num++;
+		} 
+		
+	}
+	
+	if(edge_num < Graph->Nv - 1) weight_sum = -1;
+	
+	return weight_sum;	
+}
+
+
+int main() {
+	
+    int Nv, Ne;
+    scanf("%d%d", &Nv, &Ne);
+    MinHeap mh = createMinHeap(Ne);
+    initParent(Nv);
+    
+    LGraph G = readGraph(Nv, Ne, mh);
+    
+    //printHeap(mh);
+    
+    //HeapElementType hElem = deleteHElement(mh);
+    
+    //printHeap(mh);
+    
+    int ttl = Kruskal(mh, G);
+    
+    printf("%d\n", ttl);
+
+    return 0;
+}
