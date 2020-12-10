@@ -13,7 +13,7 @@ const int ERROR = -1;
 void readString( char *str, int maxLen) {
 	
 	int i = 0;
-	while( i < maxLen && (str[i] = getchar()) != '\n' ) i++;
+	while( i <= maxLen && (str[i] = getchar()) != '\n' ) i++;
 	str[i] = '\0';
 }
 
