@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAXS 1000000
+#define MAXP 100000
+
+#define MAXT 5
+
+typedef int Position;
+const int ERROR = -1;
+
+
+void readString( char *str, int maxLen) {
+	
+	int i = 0;
+	while( i < maxLen && (str[i] = getchar()) != '\n' ) i++;
+	str[i] = '\0';
+}
+
+void buildMatch(char *ptn, int *match, int len) {
+	
+	match[0] = -1;
+	
+	int i, j;
+	
+	for(j = 1; j < len; j++) {
+		i = match[j - 1];
+		while( i >= 0 && ptn[i + 1] != ptn[j]) i = match[i];
+		
+		if( ptn[i + 1]== ptn[j] ) match[j] = i + 1;
+		else match[j] = -1;  // i = -1
+	}
+}
+
+
+Position KMP(char *str, char *ptn) {
+	
+	int n = strlen(str), m = strlen(ptn), pos = ERROR;
+	//printf("n = %d, m = %d.\n", n, m);
+	
+	//if (n < m) pos = ERROR;
+	
+	if( n >= m) {
+		
+		int p, q, *match;
+		
+		p = q = 0;
+		match = (int *)malloc( m * sizeof(int) );
+		buildMatch(ptn, match, m);
+		
+		while( p < n && q < m) {
+			
+			if(str[p] == ptn[q]) {
+				p++; q++;
+			}
+			else {
+				if( q > 0 ) q = match[q - 1] + 1;
+				else p++;
+			}
+		}
+		if( q == m ) pos = p - m;
+		
+	}
+	
+	return pos;
+}
+
+int main() {
+	
+	char string[MAXS + 1], pattern[MAXP + 1];
+	//readString(string, MAXS);
+	scanf("%s", string);
+	//printf("%s\n", string);
+	
+	int n;
+	scanf("%d\n", &n);
+	for(int i = 0; i < n; i++) {
+		//readString(pattern, MAXP);
+		//printf("%s\n", pattern);
+		scanf("%s", &pattern);
+		
+		Position pos = KMP(string, pattern);
+		if( pos == ERROR ) printf("Not Found\n");
+		else printf("%s\n", string + pos);
+		
+	}
+	
+	return 0;
+}
