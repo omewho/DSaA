@@ -1,0 +1,85 @@
+#include <cstdio>
+#include <map>
+#include <cstring>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+map<string, int>records;
+map<string, int>::iterator mpit;
+
+typedef pair<string, int> PAIR;
+vector<PAIR>::iterator vecit;
+
+bool cmpbyValue( const PAIR& lhs, const PAIR& rhs ) {
+	if( lhs.second == rhs.second ) return lhs.first < rhs.first; 
+	return lhs.second > rhs.second;
+}
+
+//struct CmpByValue {  
+//	bool operator()(const PAIR & lhs, const PAIR & rhs) {  
+//    	if( lhs.first == rhs.first ) return lhs.second < rhs.second;
+//		return lhs.first < rhs.first;
+//	}  
+//};
+
+int main() {
+	
+	int n;
+	scanf("%d", &n);
+	getchar();
+	char phonenum[12], phonenum2[12];
+	
+	for(int i = 0; i < n; i++) {
+		//getchar();
+		scanf("%s", phonenum);
+		//printf("%s\n", phonenum);
+		records[phonenum]++;
+		
+		
+		scanf("%s", phonenum);
+		//printf("%s\n", phonenum);
+		records[phonenum]++;
+	}
+	//int max = 0, maxnum
+	
+	vector<PAIR> phone_callnum(records.begin(), records.end());
+	
+//	for(mpit = records.begin(); mpit != records.end(); mpit++) {
+//		
+//		printf("%s %d\n", mpit->first.c_str(), mpit->second);
+//	}
+	
+//	for(vecit = phone_callnum.begin(); vecit != phone_callnum.end(); vecit++) {
+//		printf("%s %d\n", vecit.first.c_str(), vecit.second);
+//	}
+//	
+//	printf("\n");
+//	for(int i = 0; i < phone_callnum.size(); i++) {
+//		printf("%s %d\n", (phone_callnum[i].first).c_str(), phone_callnum[i].second);
+//	}
+//	printf("\n");
+//	
+//	printf("phone_callun[%d]: %s phone_callnum[%d]: %s. %d\n", 2, phone_callnum[2].first.c_str(), \
+//	1, phone_callnum[1].first.c_str(), phone_callnum[2].first < phone_callnum[1].first);
+//	for(vecit = phone_callnum.begin(); vecit != phone_callnum.end(); vecit++) {
+//		
+//		printf("%s %d\n", (*vecit).first.c_str(), (*vecit).second);
+//	}
+//	printf("\n");
+	
+	
+	sort(phone_callnum.begin(), phone_callnum.end(), cmpbyValue);
+	
+	int count = 0;
+	for(int i = 0; i < phone_callnum.size(); i++) {
+		
+		if(phone_callnum[i].second == phone_callnum[0].second) count++;
+		
+	}
+	printf("%s %d", phone_callnum[0].first.c_str(), phone_callnum[0].second);
+	
+	if(count != 1) printf(" %d", count);
+	printf("\n");
+	return 0;
+}
