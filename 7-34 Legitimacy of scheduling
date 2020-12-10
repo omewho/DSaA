@@ -1,0 +1,58 @@
+#include <stdio.h>
+
+#define MaxVertexNum 100
+typedef int Vertex;
+
+
+int map[MaxVertexNum][MaxVertexNum], indegree[MaxVertexNum];
+
+void readGraph(int Nv) {
+	Vertex u, v;
+	int k;
+	for(u = 0; u < Nv; u++) {
+		
+		scanf("%d", &k);
+		if (k) {
+			for(int i = 0; i < k; i++) {
+				scanf("%d", &v);
+				v--;
+				map[v][u] = 1;
+				indegree[u]++;
+			}
+		}
+	}
+}
+
+int topSort(int Nv) {
+	
+	Vertex Queue[Nv], u, v;
+	int front = 0, rear = 0, count = 0;
+	
+	for(u = 0; u < Nv; u++) {
+		if(!indegree[u]) Queue[rear++] = u;
+	}
+	
+	while(front != rear) {
+		u = Queue[front++];
+		count++;
+		
+		for(v = 0; v < Nv; v++) {
+			if(map[u][v] == 1 && ( --indegree[v] == 0) ) Queue[rear++] = v;
+			
+		}
+	}
+	
+	if(count == Nv ) return 1;
+	return 0;
+	
+}
+
+int main() {
+	
+	int Nv;
+	scanf("%d", &Nv);
+//	printf("%d\n", Nv);
+	
+	readGraph(Nv);
+	printf("%d\n", topSort(Nv));
+}
