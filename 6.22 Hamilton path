@@ -1,0 +1,103 @@
+#include <stdio.h>
+#define MaxVertexNum 200
+
+int Graph[MaxVertexNum][MaxVertexNum];
+typedef int Vertex;
+
+
+void readGraph(int Nv, int Ne) {
+	
+	Vertex u, v;
+	for( int i = 0; i < Ne; i++ ) {
+		
+		scanf("%d%d", &u, &v);
+		u--, v--;
+		Graph[u][v] = Graph[v][u] = 1;
+	}
+}
+
+void printArr(int *arr, int num) {
+	
+	for(int i = 0; i < num; i++) {
+		if(i) printf(" ");
+		printf("%d", i);
+	}
+	printf("\n");
+	
+	for(int i = 0; i < num; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+		
+}
+
+void resetArr(int *arr, int num) {
+	
+	for(int i = 0; i < num; i++) {
+		arr[i] = 0;
+	}
+}
+
+void printNO() {
+	printf("NO\n");
+}
+
+void checkCircle(int *vtx, int visitNum, int *Visit, int VertexNum) {
+	
+	//printf("vertexnum is %d, visitnum is %d, vtx is:\n", VertexNum, visitNum);
+	//printArr(vtx, visitNum);
+	if(VertexNum + 1 != visitNum) {
+		//printf("VertexNum is %d, visitNum is %d.\n", VertexNum, visitNum);
+		printNO();
+	}
+	else {
+		if( vtx[0] != vtx[visitNum - 1] ) printNO();
+		else {
+			int connected = 1;
+			for(int i = 0; i < visitNum - 1; i++) {
+				if( !Graph[vtx[i]][vtx[i + 1]] ) connected = 0;
+			}
+			if( !connected ) printNO();
+			else {
+				int once = 1;
+				for(int j = 1; j < visitNum - 1; j++) {
+					if( Visit[vtx[j]] != 1) once = 0;
+				}
+				
+				if( !once ) printNO();
+				else printf("YES\n");
+			}
+		}
+	}
+}
+
+int main() {
+	
+	int Nv, Ne;
+	scanf("%d%d", &Nv, &Ne);
+	
+	readGraph(Nv, Ne);
+	
+	int k;
+	scanf("%d", &k);
+	
+	for(int i = 0; i < k; i++) {
+		int num;
+		scanf("%d", &num);
+		
+		int vtx[num], Visit[Nv], nodenum;
+		resetArr( Visit, Nv );
+		
+		for(int j = 0; j < num; j++) {
+			scanf( "%d", &nodenum );
+			vtx[j] = nodenum - 1;
+			Visit[nodenum - 1]++;
+		}
+		
+		//printArr( vtx, num );
+		checkCircle(vtx, num, Visit, Nv);
+	}
+	
+	return 0;
+}
