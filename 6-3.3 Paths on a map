@@ -1,0 +1,248 @@
+#include <stdio.h>
+
+#define INFINITY 65535
+#define MaxVertexNum 500
+
+typedef enum{false, true} bool;
+typedef int Vertex;
+typedef int WeightType;
+
+struct edgeInfo{
+	WeightType Length, Time; 
+};
+typedef struct edgeInfo Edge;
+
+Edge Graph[MaxVertexNum][MaxVertexNum];
+bool Visited_Time[MaxVertexNum], Visited_Dist[MaxVertexNum];
+int nodeDist[MaxVertexNum];
+
+Vertex timePre[MaxVertexNum], distPre[MaxVertexNum];
+WeightType shortestTime[MaxVertexNum], shortestDist[MaxVertexNum], timeDist[MaxVertexNum];
+
+Vertex stack_time[MaxVertexNum], stack_dist[MaxVertexNum];
+int idx_time = 0, idx_dist = 0;
+
+void printArr(int *arr, int num) {
+	
+	for(int i = 0; i < num; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+void resetWTArr(WeightType *wtarr, int num) {
+	for(Vertex v = 0; v < num; v++) {
+		wtarr[v] = INFINITY;
+	}
+}
+
+void resetPreArr(Vertex *vtarr, int num) {
+	for(Vertex i = 0; i < num; i++) vtarr[i] = -1;
+}
+
+void resetTime(int Nv) {
+	
+	resetWTArr(shortestTime, Nv);
+	resetWTArr(timeDist, Nv);
+	resetPreArr(timePre, Nv);
+}
+
+
+void resetDist(int Nv) {
+	resetWTArr(shortestDist, Nv);
+	//resetWTArr(distTime, Nv);
+	resetPreArr(distPre, Nv);
+}
+
+
+void readGraph(int Nv, int Ne) {
+	
+	Vertex u, v;
+	for(u = 0; u < Nv; u++) {
+		for(v = 0; v < Nv; v++) {
+			Graph[u][v].Length = INFINITY;
+			Graph[u][v].Time = INFINITY;
+		}
+	}
+	
+	bool oneway;
+	WeightType distance, time;
+	for(int i = 0; i < Ne; i++) {
+		scanf("%d%d%d%d%d", &u, &v, &oneway, &distance, &time);
+		Graph[u][v].Length = distance;
+		Graph[u][v].Time = time;
+		
+		if(!oneway) {
+			Graph[v][u].Length = distance;
+			Graph[v][u].Time = time;
+		}
+	}
+}
+
+void dijkstra_time(int Nv, int start, int dest)  {
+	
+	resetTime(Nv);
+	
+	shortestTime[start] = 0;
+	timeDist[start] = 0;
+	
+	Vertex u = -1, v, w;
+	while(true) {
+		
+		u = -1;
+		WeightType MinTime = INFINITY;
+		for(v = 0; v < Nv; v++) {
+			
+			if(!Visited_Time[v] && shortestTime[v] < MinTime) {
+				
+				u = v;
+				MinTime = shortestTime[v];
+			}
+		}
+		
+		if(u == -1) break;
+		Visited_Time[u] = true;
+		
+		for(v = 0; v < Nv; v++) {
+			
+			if( !Visited_Time[v] && Graph[u][v].Time < INFINITY ) {
+				
+				if( shortestTime[u] + Graph[u][v].Time < shortestTime[v] ) {
+					shortestTime[v] = shortestTime[u] + Graph[u][v].Time;
+					timeDist[v] = timeDist[u] + Graph[u][v].Length;
+					timePre[v] = u;
+				}
+				else if( shortestTime[u] + Graph[u][v].Time == shortestTime[v] ) {
+					if(timeDist[u] + Graph[u][v].Length < timeDist[v]) {
+						timePre[v] = u;
+						timeDist[v] = timeDist[u] + Graph[u][v].Length;
+						timePre[v] = u;
+					}
+				}
+			}
+			
+		}
+		
+	}
+	
+	w = dest;
+	do{
+		stack_time[idx_time++] = w;
+		w = timePre[w];
+		
+	}while (w != -1); 
+}
+
+void dijkstra_dist(int Nv, int start, int dest)  {
+	
+	resetDist(Nv);
+	shortestDist[start] = 0;
+	
+	Vertex u = -1, v, w;
+	while(true) {
+		
+		u = -1;
+		WeightType MinDist = INFINITY;
+		for(v = 0; v < Nv; v++) {
+			
+			if(!Visited_Dist[v] && shortestDist[v] < MinDist) {
+				
+				u = v;
+				MinDist = shortestDist[v];
+			}
+		}
+		
+		if(u == -1) break;
+		Visited_Dist[u] = true;
+		
+		for(v = 0; v < Nv; v++) {
+			
+			if( !Visited_Dist[v] && Graph[u][v].Length < INFINITY ) {
+				
+				if( shortestDist[u] + Graph[u][v].Length < shortestDist[v] ) {
+					shortestDist[v] = shortestDist[u] + Graph[u][v].Length;
+					distPre[v] = u;
+					nodeDist[v] = nodeDist[u] + 1;
+				}
+				else if( shortestDist[u] + Graph[u][v].Length == shortestDist[v] ) {
+					if(nodeDist[u] + 1 < nodeDist[v]) {
+						distPre[v] = u;
+					}
+				}
+			}
+			
+		}
+		
+	}
+	
+	w = dest;
+	
+	do{
+		stack_dist[idx_dist++] = w;
+		w = distPre[w];
+	}while(w != -1);
+	
+}
+
+bool samePath() {
+	
+	bool res = true;
+	
+	if(idx_time != idx_dist) res = false;
+	else {
+		int i = 0;
+		while(i < idx_time) {
+			if(stack_time[i] != stack_dist[i]) {
+				res = false;
+				break;
+			}
+			i++;
+		}
+	}
+	
+	return res;
+}
+
+void printPath(Vertex *stack, int idx) {
+	for(int i = idx - 1; i >= 0; i--) {
+		if(i != idx - 1) printf(" =>");
+		else printf(":");
+		printf(" %d", stack[i]);
+	}
+	printf("\n");
+}
+
+void dijkstra(int Nv, Vertex start, Vertex dest) {
+		
+	dijkstra_time(Nv, start, dest);
+	dijkstra_dist(Nv, start, dest);
+	
+	printf("Time = %d", shortestTime[dest]);
+	if( samePath() ) {
+		printf("; Distance = %d", shortestDist[dest]);
+		
+	}
+	printPath(stack_time, idx_time);
+	if( !samePath() ) {
+		printf("Distance = %d", shortestDist[dest]);
+		printPath(stack_dist, idx_dist);
+	}
+
+}
+
+
+int main() {
+	
+	int Nv, Ne;
+	scanf("%d%d", &Nv, &Ne);
+	
+	readGraph(Nv, Ne);
+	
+	Vertex start, dest;
+	scanf("%d%d", &start, &dest);
+	
+	dijkstra(Nv, start, dest);
+	
+	return 0;
+}
