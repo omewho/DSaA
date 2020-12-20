@@ -1,0 +1,188 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 10000
+
+typedef int Position; 
+typedef enum{false, true} bool;
+typedef struct TreeNode *Tree;
+struct TreeNode{
+	int Data;
+	Tree Left, Right;
+};
+
+int pre[MAX], in[MAX], ioidx[MAX], parent[MAX];
+
+void initParent(int n) {
+	for(int i = 0; i < n; i++) {
+		parent[i] = -1;
+	}
+}
+
+Position findPos(int num, int start, int n) {
+	Position ans = -1, left = start, right = start + n - 1, mid;
+	
+	while( left <= right ) {
+		
+		mid = left + (right - left) / 2;
+		//printf("mid is %d\n", in[mid]);
+		if(in[mid] == num) {
+			ans = mid;
+			break;
+		}
+		else if(in[mid] < num) left = mid + 1;
+		else right = mid - 1;
+	}
+	return ans;
+}
+
+//Position findPrePos(int num, int start, int n) {
+//	Position ans = -1, left = start, right = start + n - 1, mid;
+//	
+//	while( left <= right ) {
+//		
+//		mid = left + (right - left) / 2;
+//		//printf("mid is %d\n", in[mid]);
+//		if(in[mid] == num) {
+//			ans = mid;
+//			break;
+//		}
+//		else if(in[mid] < num) left = mid + 1;
+//		else right = mid - 1;
+//	}
+//	return ans;
+//}
+
+Position findParent(int idx) {
+	
+	return parent[idx];
+}
+
+Tree buildTree(int preLeft, int inLeft, int n) {
+	
+	if(n) {
+		
+		Tree t = (Tree)malloc(sizeof(struct TreeNode));
+		t->Data = pre[preLeft];
+		
+		Position p = findPos(t->Data, inLeft, n);
+		int leftNum = p - inLeft, rightNum = n - 1 - leftNum;
+		
+		if(n > 1) {
+			int root = pre[preLeft];
+			for(int i = inLeft; i < inLeft + n; i++) {
+				if(in[i] != root) parent[i] = p;
+			}
+		}
+		
+		t->Left = buildTree(preLeft + 1, inLeft, leftNum);
+		t->Right = buildTree(preLeft + leftNum + 1, p + 1, rightNum);
+		return t;
+	}
+	return NULL;
+}
+
+int compare(const void *pa, const void *pb) {
+	return *(int *)pa - *(int *)pb;
+}
+
+void printArr(int *arr, int n) {
+	for(int i = 0; i < n; i++) {
+		if(i) printf(" ");
+		printf("%d", arr[i]);
+	}
+	printf("\n");
+}
+
+int findLCA(Position p, Position q, int n) {
+	
+	
+	if(parent[p] == q) return q;
+	if(parent[q] == p) return p;
+	
+	int path[n], lca = -1;
+	bool visited[n];
+	int idx = 0;
+	for(int i = 0; i < n; i++) {
+		path[i] = -1;
+		visited[i] = 0;
+	}
+//	printArr(parent, n);
+//	printArr((int *)visited, n);
+	
+	while(p >= 0) {
+		path[idx++] = p;
+		visited[p] = 1;
+		p = parent[p];
+	}
+//	printf("path is \n");
+//	printArr(path, n);
+//	printArr((int *)visited, n);
+//	printf("q is now %d\n", q);
+	while(q >= 0) {
+		if(visited[q]) {
+			//printf("q is %d\n", q);
+			lca = q;
+			break;
+		}
+		q = parent[q];
+	}
+	
+//	while(p != q) {
+//		int m = in[p], n = in[q];
+//		printf("m is %d, n is %d\n", m, n);
+//		if(m < n) {
+//			p = findParent(p);
+//		}
+//		else {
+//			q = findParent(q); 
+//		}
+//	}
+	return lca;
+}
+
+int main() {
+	
+	int m, n;
+	scanf("%d%d", &m, &n);
+	
+	int nums[n];
+	for(int i = 0; i < n; i++) {
+		scanf("%d", &pre[i]);
+		in[i] = pre[i];	
+	}
+	qsort(in, n, sizeof(int), compare);
+	initParent(n);
+	
+	Tree t = buildTree(0, 0, n);
+	//printArr(in, n);
+	int u, v;
+	Position p, q;
+	//printArr(parent, n);
+	
+	for(int i = 0; i < m; i++) {
+		scanf("%d%d", &u, &v);
+		p = findPos(u, 0, n);
+		q = findPos(v, 0, n);
+		if(p == -1 && q == -1) printf("ERROR: %d and %d are not found.\n", u, v);
+		else if(p == -1) printf("ERROR: %d is not found.\n", u);
+		else if(q == -1) printf("ERROR: %d is not found.\n", v);
+		else {
+//			printf("p is %d, q is %d\n", p, q);
+//			printf("parent p is %d, parent q is %d\n", findParent(p), findParent(q));
+//			printf("parent p is %d, parent q is %d\n", in[findParent(p)], in[findParent(q)]);
+//			printf("LCA is %d\n", findLCA(p, q, n));
+			
+			Position lca = findLCA(p, q, n);
+			if( p == lca) printf("%d is an ancestor of %d.\n", u, v);
+			else if(q == lca) printf("%d is an ancestor of %d.\n", v, u);
+			else printf("LCA of %d and %d is %d.\n", u, v, in[lca]);
+		}
+		
+	}
+	
+	//printf("num is %d, pos of %d is %d\n", num, num, findPos(num, n));
+	
+	
+	return 0;
+	
+}
