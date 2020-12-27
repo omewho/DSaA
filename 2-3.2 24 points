@@ -1,0 +1,170 @@
+#include <stdio.h>
+#define N 4
+
+typedef enum{false, true} bool;
+
+char op[N] = {'+', '-', '*', '/'};
+
+double xopy(double x, double y, char op) {
+	
+	double ans = 0;
+	
+	switch(op) {
+		
+		case '+':
+			ans = x + y;
+			break;
+		case '-':
+			ans = x - y;
+			break;
+		case '*':
+			ans = x * y;
+			break;
+		case '/':
+			if(y != 0) ans = x / y;
+			break;
+	}
+	
+	return ans;
+}
+
+//((num1 op1 num2) op2 num3) op3 num4
+double first(int *num, char op1, char op2, char op3) {
+	
+	double x, y, z;
+	x = xopy(num[0], num[1], op1);
+	y = xopy(x, num[2], op2);
+	z = xopy(y, num[3], op3);
+	
+	return z;
+}
+
+//( (num1 op1 num2) op2 (num3 op3 num4))
+double second(int *num, char op1, char op2, char op3) {
+	
+	double x, y, z;
+	x = xopy(num[0], num[1], op1);
+	y = xopy(num[2], num[3], op3);
+	z = xopy(x, y, op2);
+	
+	return z;
+}
+
+// (num1 op1 (num2 op2 num3)) op3 num4
+double third(int *num, char op1, char op2, char op3) {
+	
+	double x, y, z;
+	x = xopy(num[1], num[2], op2);
+	y = xopy(num[0], x, op1);
+	z = xopy(y, num[3], op3);
+	
+	return z;
+}
+
+//   num1 op1 ((num2 op2 num3) op3 num4)
+double fourth(int *num, char op1, char op2, char op3) {
+	
+	double x, y, z;
+	x = xopy(num[1], num[2], op2);
+	y = xopy(x, num[3], op3);
+	z = xopy(num[0], y, op1);
+	
+	return z;
+}
+
+//   num1 op1 (num2 op2 (num3 op3 num4))
+double fifth(int *num, char op1, char op2, char op3) {
+	
+	double x, y, z;
+	x = xopy(num[2], num[3], op3);
+	y = xopy(num[1], x, op2);
+	z = xopy(num[0], y, op1);
+	
+	return z;
+}
+
+bool findSolution(int *num, char *op) {
+	
+	int i, j, k;
+	char op1, op2, op3;
+	bool found = false;
+	
+	for(i = 0; i < N; i++) {
+		
+		for(j = 0; j < N; j++) {
+			
+			for(k = 0; k < N; k++) {
+				
+				op1 = op[i], op2 = op[j], op3 = op[k];
+//				printf("%d %d %d\n", i, j, k);
+//				printf("%c %c %c\n", op1, op2, op3);
+//				printf("%.4f\n", first(num, op1, op2, op3));
+
+				if( first(num, op1, op2, op3) == 24 ) {
+					//printf("%lf\n", first(num, op1, op2, op3));
+					printf("((%d%c%d)%c%d)%c%d\n", num[0], op1, num[1], op2, num[2], op3, num[3]);
+					//printf("%d %d %d\n", i, j, k);
+					return true;
+				}
+				if( second(num, op1, op2, op3) == 24 ) {
+					printf("(%d%c%d)%c(%d%c%d)\n", num[0], op1, num[1], op2, num[2], op3, num[3]);
+					return true;
+				}
+				if( third(num, op1, op2, op3) == 24 ) {
+					
+//					printf("third: %lf\n", third(num, op1, op2, op3));
+//					printf("%d %d %d\n", i, j, k);
+					printf("(%d%c(%d%c%d))%c%d\n", num[0], op1, num[1], op2, num[2], op3, num[3]);
+					return true;
+				}
+				if( fourth(num, op1, op2, op3) == 24 ) {
+					printf("%d%c((%d%c%d)%c%d)\n", num[0], op1, num[1], op2, num[2], op3, num[3]);
+					return true;
+				}
+				if( fifth(num, op1, op2, op3) == 24 ) {
+					printf("%d%c(%d%c(%d%c%d))\n", num[0], op1, num[1], op2, num[2], op3, num[3]);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+
+int main() {
+	
+	int nums[N];
+	for(int i = 0; i < N; i++) {
+		scanf("%d", &nums[i]);
+	}
+	
+	int numbers[N];
+	bool found = false;
+	for(int i = 0; i < N; i++) {
+		
+		for(int j = 0; j < N; j++) {
+			
+			if(j == i) continue;
+			for(int k = 0; k < N; k++) {
+				
+				if(k == i || k == j) continue;
+				for(int l = 0; l < N; l++) {
+					
+					if(l == k || l == j || l == i) continue;
+					
+					numbers[0] = nums[i], numbers[1] = nums[j], numbers[2] = nums[k], numbers[3] = nums[l];
+					found = findSolution(numbers, op);
+					if(found) break;
+				}
+				if(found) break;
+			}
+			if(found) break;	
+		}
+		if(found) break;
+	}
+	
+	if(!found) printf("-1\n");
+	return 0;
+}
