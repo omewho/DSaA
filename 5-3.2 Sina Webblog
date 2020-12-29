@@ -1,0 +1,344 @@
+#include <stdio.h>
+#include <math.h>
+#include <ctype.h>
+#include <string.h> 
+#include <stdlib.h>
+#define MAX 100000
+#define MAXLEN 140
+#define MASK ((1 << (5 * 5)) - 1)
+
+typedef enum{false, true} bool;
+typedef char ElementType[MAXLEN + 1];
+//typedef enum{false, true} bool;
+
+ElementType aBlog;
+
+void getABlog(ElementType aBlog) {
+	int i = 0;
+	while(i < MAXLEN && (aBlog[i] = getchar()) != '\n') i++;
+	aBlog[i] = '\0';
+}
+
+typedef struct topicNode* Node;
+struct topicNode{
+	ElementType Topic;
+	int NumofMentions;
+};
+typedef struct topicNode ATopic;
+
+ATopic Topics[10000000];
+int ttl = 0;
+
+int comp(const void* pa, const void* pb) {
+	
+	ATopic topica = *(Node)pa, topicb = *(Node)pb;
+	
+	if(topica.NumofMentions != topicb.NumofMentions) return topicb.NumofMentions - topica.NumofMentions;
+	else return strcmp(topica.Topic, topicb.Topic);
+	
+	//return strcmp((*(Node)pa).Topic, (*(Node)pb).Topic);
+}
+
+typedef struct ListNode *PtrToListNode;
+struct ListNode {
+	ElementType Topic;
+	int NumofMentions;
+	int LastIndex;
+	PtrToListNode Next;
+};
+typedef PtrToListNode Position;
+typedef PtrToListNode List;
+
+/*   Definition of HashTable         */
+typedef struct HashTableNode* HashTable;
+struct HashTableNode{
+	int TableSize;
+	List Heads;
+};
+
+HashTable createHT(int TableSize) {
+	
+	HashTable ht = (HashTable)malloc(sizeof(struct HashTableNode));
+	ht->TableSize = TableSize;
+	
+	ht->Heads = (List)malloc(sizeof(struct ListNode) * ht->TableSize);
+	
+	for(int i = 0; i < ht->TableSize; i++) {
+		//ht->Heads[i].NumofMentions = 0;
+		ht->Heads[i].Topic[0] = '\0';
+		ht->Heads[i].Next = NULL;
+	}
+	
+	return ht;
+}
+
+
+int Hash(ElementType key, int TableSize) {
+	
+	ElementType str;
+	int i = 0, j = 0, len = strlen(key);
+	
+	while (i < len) {
+		if(key[i] != ' ') str[j++] = key[i++];
+		else i++;
+	}
+	str[j] = '\0';
+	
+	ElementType hashkey;
+	i = 1, j = 0, len = strlen(str);
+	
+	while(i < len) {
+		if( (i % 2)) hashkey[j++] = str[i];
+		i += 2;
+		if(j == 5) break;
+	}
+	hashkey[j] = '\0';
+	
+//	printf("str is %s\\\n", str);
+//	printf("hashkey is %s\\\n", hashkey);
+	
+	int sum = 0;
+	
+	for(int i = 0; i < j; i++) {
+		//printf("hashkey[%d] - 'a' = %d, sum << 5 is %d\n", i, hashkey[i] - 'a', (hashkey[i] - 'a')<<5);
+		sum = (sum<<5) + (hashkey[i] - 'a');
+//		printf("sum is %d, i is %d\n", sum, i);
+	}
+	//printf("sum is %d, tsize is %d\n", sum, TableSize);
+	return ( sum&MASK ) % TableSize;
+}
+
+//Position find(ElementType key, HashTable ht) {
+//	
+//	int pos = Hash(key, ht->TableSize);
+//	
+//	Position p = ht->Heads[pos].Next;
+//	while(p && strcmp(key, p->Topic)) p = p->Next;
+//	
+//	return p;
+//}
+
+int getFreq(ElementType key, HashTable ht) {
+	
+	int pos = Hash(key, ht->TableSize);
+	
+	Position p = ht->Heads[pos].Next;
+	while(p && strcmp(key, p->Topic)) p = p->Next;
+	
+	return p->NumofMentions;
+}
+
+
+void insertIntoHT(ElementType key, int index, HashTable ht) {
+	
+	int pos = Hash(key, ht->TableSize);
+	
+	Position p = ht->Heads[pos].Next, curr, prev;
+	
+	while( p && strcmp(key, p->Topic)) {
+		p = p->Next;
+	}
+	
+	if(p && p->LastIndex != index) {
+		(p->NumofMentions)++;
+		p->LastIndex = index;
+		
+		prev = ht->Heads[pos].Next;
+		//printf("The the the list is:\n");
+		while(prev) {
+			//printf("%s %d\n", prev->Topic, prev->NumofMentions);
+			prev = prev->Next;
+		}
+	}
+	else {
+		
+		if( !p ) {
+			
+			struct topicNode topic;
+			strcpy(topic.Topic, key);
+			Topics[ttl++] = topic;
+			
+			
+			Position newCell = (List)malloc(sizeof(struct ListNode));
+			newCell->LastIndex = index;
+			newCell->Next = NULL;
+			newCell->NumofMentions = 1;
+			strcpy(newCell->Topic, key);
+			
+			prev = ht->Heads[pos].Next;
+			if(!prev) ht->Heads[pos].Next = newCell;
+			else {
+				curr = prev->Next;
+				while( curr && strcmp(curr->Topic, newCell->Topic) < 0 ) {// curr < newCell
+					prev = curr;
+					curr = curr->Next;
+				}
+				prev->Next = newCell;
+				newCell->Next = curr; 			
+			}
+			
+			prev = ht->Heads[pos].Next;
+			//printf("This list is:\n");
+			while(prev) {
+				//printf("%s %d\n", prev->Topic, prev->NumofMentions);
+				prev = prev->Next;
+			}
+			//printf("\n");			
+			
+		}
+		else if(p && p->LastIndex == index) {
+			prev = ht->Heads[pos].Next;
+			while(prev) {
+				//printf("%s %d\n", prev->Topic, prev->NumofMentions);
+				prev = prev->Next;
+			}
+			//printf("\n");
+		}
+	}
+}
+
+void operate(HashTable ht, ElementType aBlog, int index) {
+	
+	int i = 0, j, start, end, key_index;
+	
+	ElementType aTopic, key;
+	
+	bool started = false;
+	while (i < MAXLEN && aBlog[i] != '\0') {
+		if(aBlog[i] == '#') {
+			
+			if(!started) {
+				start = i + 1;
+				//printf("start is %d\n", start);
+				started = true;
+				strcpy(aTopic, aBlog + start);
+				//printf("aTopic is %s\n", aTopic);
+			}
+			else {
+				started = false;
+				//printf("i is %d\n", i);
+				
+				int len = i - start;
+				//printf("\nstart is now %d\n", start);
+				aTopic[len] = '\0';
+				//printf("aTopic is now %s\\\n", aTopic);
+				
+				j = 0, len = strlen(aTopic), key_index = 0;
+				//printf("len is here now %d\n", len);
+				bool first = true;
+				while(aTopic[j] == ' ') j++;
+				end = len - 1;
+				while( !isalnum(aTopic[end]) ) end--;
+				end++;
+				aTopic[end] = '\0';
+//				printf("aTopic now now is %s\\\n", aTopic);
+				
+				len = strlen(aTopic);
+				
+				while(j < len) {
+					if(isalnum(aTopic[j])) {
+						
+						key[key_index++] = aTopic[j++];
+						if(key[key_index - 1] >= 'A' && key[key_index - 1] <= 'Z') key[key_index - 1] += 'a' - 'A';
+						if(!first) first = true;
+					}
+					else {
+						if(first) {
+							key[key_index++] = ' ';
+							first = false;
+						}
+						
+						j++;
+					}
+					//if(key_index == 40) break;
+				}
+				key[key_index] = aTopic[j];
+				if(key[0] >= 'a' && key[0] <= 'z') key[0] -= 'a' - 'A';
+//				printf("Here key is %s\\\n", key);
+//				printf("Are you ok?\n");
+//				while(key[key_index - 1] == ' ') {
+//					key_index--;
+//					printf("key_index is %d\n", key_index);
+//				}
+//				key[key_index] = aTopic[j];
+				//printf("key is %s\\\n", key);
+				
+//				int pos = Hash(key, ht->TableSize);			
+//				printf("pos is %d\n", pos);
+				
+				insertIntoHT(key, index, ht);
+				
+				//printf("\n\n index is %d\n\n", index);
+			}
+			
+		}
+		i++;
+	}
+}
+
+
+
+bool isPrime(int n) {
+	if(n < 2) return false;
+	
+	if(n > 2) {
+		bool foundfactor = false;
+		for(int i = 2; i < (int) sqrt(n) + 1; i++) {
+			if(n % i == 0) {
+				foundfactor = true;
+				break;
+			}
+		}
+		if(foundfactor) return false;	
+	}
+	
+	return true;
+}
+
+int getNextPrime(int n) {
+	n++;
+	while(!isPrime(n)) n++;
+	return n;
+} 
+
+
+int main() {
+	
+	int N;
+	scanf("%d\n", &N);
+	//printf("%d\n", N);
+	
+	int tSize = getNextPrime(N);
+	HashTable ht = createHT(tSize);
+	
+	//printf("ht->TableSize is %d\n", ht->TableSize);
+	
+	for(int i = 0; i < N; i++) {
+		
+		getABlog(aBlog);
+		operate(ht, aBlog, i);
+//		printf("%s\n", aBlog);
+//		printf("%d\n", strlen(aBlog));
+	}
+	
+	int max = 0;
+	for(int i = 0; i < ttl; i++) {
+		Topics[i].NumofMentions = getFreq(Topics[i].Topic, ht);
+		
+		//printf("%s %d\n", Topics[i].Topic, Topics[i].NumofMentions);
+	}
+
+	qsort(Topics, ttl, sizeof(struct topicNode), comp);
+	for(int i = 0; i < ttl; i++) {
+		//printf("%s %d\n\n\n", Topics[i].Topic, Topics[i].NumofMentions);
+	}
+	
+	int maxcount = 0, maxMention = Topics[0].NumofMentions;
+	int idx = 0;
+	while(Topics[idx].NumofMentions == maxMention) idx++;
+	
+	printf("%s\n%d\n", Topics[0].Topic, maxMention);
+	if(idx > 1) printf("And %d more ...\n", idx - 1);
+	
+	return 0;
+}
