@@ -1,0 +1,74 @@
+#include <cstdio>
+#include <cstdlib>
+#include <algorithm>
+#include <vector>
+#define N 100000
+#define MAXN 12
+
+using namespace std;
+
+int Stack[N];
+int top = -1;
+
+vector<int> myvec;
+vector<int>::iterator vecit;
+
+void getOp(char *op) {
+	
+	int i = 0;
+	
+	while(i < MAXN && (op[i] = getchar()) != '\n') i++;
+	op[i] = '\0';
+}
+
+void operate(char* op){
+	int num;
+	char op1 = op[1];
+	switch(op1) {
+		case 'o':
+			if(top < 0) printf("Invalid\n");
+			else {
+				printf("%d\n", Stack[top]);
+				vecit = lower_bound(myvec.begin(), myvec.end(), Stack[top--]);
+				myvec.erase(vecit);
+			}
+			
+			break;
+		case 'e':
+			if(top < 0) printf("Invalid\n");
+			else {
+				int size = myvec.size(), pos = size / 2;
+				if (size % 2 == 0) pos--;
+				printf("%d\n", myvec[pos]);
+			}
+			break;
+		case 'u':
+			num = atoi(op + 5);
+			//printf("%d\n", num);
+			Stack[++top] = num;
+			
+			vecit = lower_bound(myvec.begin(), myvec.end(), Stack[top]);
+			myvec.insert(vecit, Stack[top]);
+			
+			break;
+	}
+}
+
+int main() {
+	
+	int n;
+	scanf("%d\n", &n);
+	
+	
+	char op[MAXN];
+	
+	for(int i = 0; i < n; i++) {
+		
+		getOp(op);
+
+		operate(op);
+		
+	}
+	
+	return 0;
+}
